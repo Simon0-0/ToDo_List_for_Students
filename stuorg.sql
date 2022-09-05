@@ -2,7 +2,7 @@
 -- USER
 CREATE TABLE stuorgUser
 (
-userid INT NOT NULL IDENTITY PRIMARY KEY,
+userid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
 -- Primary key: userid
 username NVARCHAR (50) NOT NULL,
 email NVARCHAR (50) NOT NULL,
@@ -12,7 +12,7 @@ email NVARCHAR (50) NOT NULL,
 -- ACCOUNT
 CREATE TABLE stuorgAccount
 (
-accountid INT NOT NULL IDENTITY PRIMARY KEY,
+accountid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
 -- Primary key: accountID
 displayname NVARCHAR (50) NOT NULL,
 accountdescription NVARCHAR (MAX), 
