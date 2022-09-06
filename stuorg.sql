@@ -2,105 +2,106 @@
 -- ROLE
 CREATE TABLE stuorgRole
 (
-roleid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
--- Primary key: roleid
-roletype NVARCHAR (50) NOT NULL,
-roledescription NVARCHAR (255),
-); 
+    roleId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    -- Primary key: roleid
+    roleType NVARCHAR (50) NOT NULL,
+    roleDescription NVARCHAR (255),
+);
 
 
 -- LABLE
 CREATE TABLE stuorgTaskLabel
 (
-labelid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
--- Primary key: labelid
-labeldescription NVARCHAR (255) NOT NULL ,
-); 
+    labelId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    -- Primary key: labelid
+    labelDescription NVARCHAR (255) NOT NULL
+    ,
+);
 
 
 -- USER
 CREATE TABLE stuorgUser
 (
-userid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
--- Primary key: userid
-username NVARCHAR (50) NOT NULL,
-email NVARCHAR (50) NOT NULL,
-); 
+    userId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    -- Primary key: userid
+    userName NVARCHAR (50) NOT NULL,
+    email NVARCHAR (50) NOT NULL,
+);
 
 
 -- ACCOUNT
 CREATE TABLE stuorgAccount
 (
-accountid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
--- Primary key: accountID
-displayname NVARCHAR (50) NOT NULL,
-accountdescription NVARCHAR (MAX), 
-FK_userid INT UNIQUE,
+    accountId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    -- Primary key: accountID
+    displayName NVARCHAR (50) NOT NULL,
+    accountDescription NVARCHAR (MAX),
+    FK_userId INT UNIQUE,
 
-CONSTRAINT [not sure what to put here...] FOREIGN KEY (FK_userid) REFERENCES stuorgUser (userid)
+    CONSTRAINT stuorgFK_Account_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
 );
 
 -- PASSWORD
 CREATE TABLE stuorgPassword
 (
-FK_accountid INT NOT NULL UNIQUE,
-hashedpassword NVARCHAR(255) NOT NULL,
+    FK_accountId INT NOT NULL UNIQUE,
+    hashedPassword NVARCHAR(255) NOT NULL,
 
-CONSTRAINT [not sure what to put here...] FOREIGN KEY (FK_accountid) REFERENCES stuorgAccount (accountid)
+    CONSTRAINT stuorgFK_Password_Account FOREIGN KEY (FK_accountId) REFERENCES stuorgAccount (accountId)
 );
 
 
 -- TASK
 CREATE TABLE stuorgTask
 (
-taskid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
-FK_labelid INT UNIQUE,
-FK_ownerid INT UNIQUE,
-taskduedate INT,
-tasksubject NVARCHAR(50),
+    taskId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    FK_labelId INT UNIQUE,
+    FK_ownerId INT UNIQUE,
+    taskdueDate INT,
+    tasksubject NVARCHAR(50),
 
-CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelid) REFERENCES stuorgTaskLabel (labelid),
+    CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
-CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerid) REFERENCES stuorgUser (userid),
+    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerId) REFERENCES stuorgUser (userId),
 
 )
 
 -- GROUP
 CREATE TABLE stuorgGroup
 (
-groupid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
-FK_userid INT UNIQUE,
-groupdescription NVARCHAR(255) NOT NULL
+    groupId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+    FK_userId INT UNIQUE,
+    groupDescription NVARCHAR(255) NOT NULL
 
 
-CONSTRAINT stuorFK_Group_User FOREIGN KEY (FK_userid) REFERENCES stuorgUser (userid)
+        CONSTRAINT stuorgFK_Group_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
 );
 
 
 --GROUP TASK
 CREATE TABLE stuorgGroupTask
 (
-FK_taskid INT UNIQUE,
-FK_groupid INT UNIQUE,
-FK_userid INT UNIQUE,
+    FK_taskId INT UNIQUE,
+    FK_groupId INT UNIQUE,
+    FK_userId INT UNIQUE,
 
 
-CONSTRAINT stuorFK_GroupTask_User FOREIGN KEY (FK_userid) REFERENCES stuorgUser (userid),
-CONSTRAINT stuorFK_GroupTask_Group FOREIGN KEY (FK_groupid) REFERENCES stuorgGroup (groupid),
-CONSTRAINT stuorFK_GroupTask_Task FOREIGN KEY (FK_taskid) REFERENCES stuorgTask (taskid)
+    CONSTRAINT stuorgFK_GroupTask_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId),
+    CONSTRAINT stuorgFK_GroupTask_Group FOREIGN KEY (FK_groupId) REFERENCES stuorgGroup (groupId),
+    CONSTRAINT stuorgFK_GroupTask_Task FOREIGN KEY (FK_taskId) REFERENCES stuorgTask (taskId)
 );
 
 --STUORGUSERGROUP
 
 CREATE TABLE stuorgUserGroup
 (
-FK_groupid INT NOT NULL,
-FK_userid INT NOT NULL,
-CONSTRAINT PK_UserGroup PRIMARY KEY
+    FK_groupId INT NOT NULL,
+    FK_userId INT NOT NULL,
+    CONSTRAINT PK_UserGroup PRIMARY KEY
     (
-        groupid,
-        userid
+        groupId,
+        userId
     ),
-FOREIGN KEY (FK_userid) REFERENCES stuorgUser (userid),
-FOREIGN KEY (FK_groupid) REFERENCES stuorgUser (groupid)
+    FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId),
+    FOREIGN KEY (FK_groupId) REFERENCES stuorgUser (groupId)
 );
