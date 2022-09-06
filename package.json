@@ -1,0 +1,28 @@
+{
+  "name": "api_elective_exam",
+  "version": "1.0.0",
+  "description": "the exam project for Web Api Developement elective",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Simon0-0/ToDo_List_for_Students.git"
+  },
+  "author": "Simona Kocisova, Ida Rishoj Jensen, Zuzanna Zyla",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Simon0-0/ToDo_List_for_Students/issues"
+  },
+  "homepage": "https://github.com/Simon0-0/ToDo_List_for_Students#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "config": "^3.3.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "joi": "^17.6.0",
+    "mssql": "^9.0.1"
+  }
+}
