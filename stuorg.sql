@@ -1,4 +1,23 @@
 
+-- ROLE
+CREATE TABLE stuorgRole
+(
+roleid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+-- Primary key: roleid
+roletype NVARCHAR (50) NOT NULL,
+roledescription NVARCHAR (255),
+); 
+
+
+-- LABLE
+CREATE TABLE stuorgTaskLabel
+(
+labelid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+-- Primary key: labelid
+labeldescription NVARCHAR (255) NOT NULL ,
+); 
+
+
 -- USER
 CREATE TABLE stuorgUser
 (
@@ -30,6 +49,21 @@ hashedpassword NVARCHAR(255) NOT NULL,
 CONSTRAINT [not sure what to put here...] FOREIGN KEY (FK_accountid) REFERENCES stuorgAccount (accountid)
 );
 
+
+-- TASK
+CREATE TABLE stuorgTask
+(
+taskid INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
+FK_labelid INT UNIQUE,
+FK_ownerid INT UNIQUE,
+taskduedate INT,
+tasksubject NVARCHAR(50),
+
+CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelid) REFERENCES stuorgTaskLabel (labelid),
+
+CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerid) REFERENCES stuorgUser (userid),
+
+)
 
 -- GROUP
 CREATE TABLE stuorgGroup
