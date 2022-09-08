@@ -5,7 +5,7 @@ CREATE TABLE stuorgRole
     roleId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
     -- Primary key: roleid
     roleType NVARCHAR (50) NOT NULL,
-    roleDescription NVARCHAR (255),
+    roleDescription NVARCHAR (255)
 );
 
 
@@ -15,7 +15,6 @@ CREATE TABLE stuorgTaskLabel
     labelId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
     -- Primary key: labelid
     labelDescription NVARCHAR (255) NOT NULL
-    ,
 );
 
 
@@ -25,7 +24,7 @@ CREATE TABLE stuorgUser
     userId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
     -- Primary key: userid
     userName NVARCHAR (50) NOT NULL,
-    email NVARCHAR (50) NOT NULL,
+    email NVARCHAR (50) NOT NULL
 );
 
 
@@ -62,8 +61,7 @@ CREATE TABLE stuorgTask
 
     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
-    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerId) REFERENCES stuorgUser (userId),
-
+    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerId) REFERENCES stuorgUser (userId)
 )
 
 -- GROUP
@@ -71,7 +69,7 @@ CREATE TABLE stuorgGroup
 (
     groupId INT NOT NULL IDENTITY PRIMARY KEY UNIQUE,
     FK_userId INT UNIQUE,
-    groupDescription NVARCHAR(255) NOT NULL
+    groupDescription NVARCHAR(255) NOT NULL,
 
 
         CONSTRAINT stuorgFK_Group_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
