@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');//do we need to install this?
 module.exports = (req, res, next) => {
     try {
     //check if there is a token in the header
-    const token = req.header('x-authentication-token');//adjust to what we will name our auth header
+    const token = req.header('x-authToken');//adjust to what we will name our auth header
     if (!token) throw {statusCode: 401, errorMessage: `Access denied, no token provided.`, errorObj: {} };
 
     //check if token is correct (can be decrypted)

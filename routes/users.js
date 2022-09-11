@@ -1,6 +1,7 @@
 //require modules
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/authenticate')
 //const authenticate = require('../middleware/authenticate'); - NOT CREATED
 //const admin = require('../middleware/admin'); - NOT CREATED
 
@@ -13,7 +14,7 @@ router.get('/', (req, res) => {
 }); 
 
 //POST endpoint
-router.post('/', [authenticate], (req, res) => {//adjust to our project
+router.post('/', [auth], (req, res) => {//adjust to our project
     res.header('Content-type', 'application/json');
 
     console.log(req.account);
@@ -21,14 +22,14 @@ router.post('/', [authenticate], (req, res) => {//adjust to our project
 });
 
 //PUT endpoint
-router.put('/:profileid', [authenticate], (req, res) => {//adjust to our project
+router.put('/:profileid', [auth], (req, res) => {//adjust to our project
     res.header('Content-type', 'application/json');
 
     res.send(JSON.stringify({message: `This is PUT /api/profiles/${req.params.profileid}`}));
 });
 
 //DELETE endpoint
-router.delete('/:profileid', [authenticate, admin], (req, res) => {//adjust to our project
+router.delete('/:profileid', [auth], (req, res) => {//adjust to our project
     res.header('Content-type', 'application/json');
 
     res.send(JSON.stringify({message: `This is DELETE /api/profiles/${req.params.profileid}`}));
