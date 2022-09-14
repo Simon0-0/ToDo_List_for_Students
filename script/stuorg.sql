@@ -232,3 +232,10 @@ FROM stuorgUser u
     ON a.accountId = p.FK_accountId
 GO
 
+SELECT *
+FROM stuorgUser u
+    JOIN stuorgAccount a
+    ON u.userId = a.FK_userId
+    JOIN stuorgRole r
+    ON a.FK_roleId = r.roleId
+WHERE u.email = 'heJustTryingToWarnYou@email.com'

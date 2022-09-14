@@ -12,26 +12,26 @@ class Account {
       this.accountId = accountObj.accountId;
     }
     this.userId = accountObj.userId;
-    this.email = accountObj.email
+    this.email = accountObj.email;
     this.displayName = accountObj.displayName;
-    if(accountObj.accountDescription){
-    this.accountDescription = accountObj.accountDescription;
+    if (accountObj.accountDescription) {
+      this.accountDescription = accountObj.accountDescription;
     }
     this.role = {
       roleId: accountObj.role.roleId,
     };
     if (accountObj.role.roleType) {
       this.role.roleType = accountObj.role.roleType;
-    
     }
-  };
-  
+  }
 
   //creating our validation for our account object
   static validationSchema() {
     const schema = Joi.object({
       accountId: Joi.number().integer().min(1),
       displayName: Joi.string().max(255).required(),
+      email: Joi.string().max(50).required(),
+      
       //.required(),?
       accountDescription: Joi.string().allow(null), //allow null description?
       userId: Joi.number().integer().min(1),
@@ -67,7 +67,7 @@ class Account {
         //find the account
         console.log("we are here");
         try {
-        console.log("started try and catch bloc");
+          console.log("started try and catch bloc");
 
           const account = await Account.findAccountByUser(credObj.email);
           console.log("account found");
@@ -87,8 +87,8 @@ class Account {
           console.log("result recevied");
 
           const hashedPas = result.recordset[0].hashedPassword;
-          console.log(`result recordset ${result.recordset[0]}`)
-          console.log(credObj.password)
+          console.log(`result recordset ${result.recordset[0]}`);
+          console.log(credObj.password);
 
           const okCred = bcrypt.compareSync(credObj.password, hashedPas);
 
@@ -97,7 +97,7 @@ class Account {
             throw {
               statusCode: 401,
             };
-            console.log('resolving account')
+          console.log("resolving account");
           resolve(account);
         } catch (err) {
           reject({
@@ -169,20 +169,20 @@ class Account {
           const { error } = Account.validate(accountWanbe);
           console.log("account validated in readByUser function");
 
-        //   if (error)
-        //     throw {
-        //       statusCode: 500,
-        //       errorMessage: `Corrupted account data in the DB`,
-        //     };
+          if (error)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupted account data in the DB`,
+              errorObj: error,
+            };
 
           console.log("started resolve");
 
-
           resolve(new Account(accountWanbe));
           console.log("resolved with account");
-          
         } catch (err) {
-            console.log('we are getting rejected with an error')
+          console.log("we are getting rejected with an error");
+          console.log(err);
           reject(err);
         }
         sql.close();
