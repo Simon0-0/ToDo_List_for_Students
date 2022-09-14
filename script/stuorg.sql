@@ -76,6 +76,7 @@ CREATE TABLE stuorgTaskLabel
 (
     labelId INT NOT NULL IDENTITY PRIMARY KEY,
     -- Primary key: labelid
+    labelName NVARCHAR (50) NOT NULL,
     labelDescription NVARCHAR (255) NOT NULL
 );
 
