@@ -31,7 +31,7 @@ class Account {
       accountId: Joi.number().integer().min(1),
       displayName: Joi.string().max(255).required(),
       email: Joi.string().max(50).required(),
-      
+
       //.required(),?
       accountDescription: Joi.string().allow(null), //allow null description?
       userId: Joi.number().integer().min(1),
@@ -124,6 +124,93 @@ class Account {
             .input("email", sql.NVarChar(), email)
             .query(
               `
+              SELECT *
+              FROM stuorgUser u
+              JOIN stuorgAccount a 
+              ON u.userId = a.FK_userId
+              JOIN stuorgRole r
+              ON a.FK_roleId = r.roleId
+              WHERE u.email = @email
+              `
+            );
+
+          console.log("send the query to the datebase");
+
+          if (result.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `Account not found`,
+              errorObj: {},
+            };
+          if (result.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupt data in DB`,
+              errorObj: {},
+            };
+          if ((result.recordset.length = 1)) {
+            console.log(`one result found`);
+          }
+
+          const accountWanbe = {
+            accountId: result.recordset[0].accountId,
+            userId: result.recordset[0].userId,
+            email: result.recordset[0].email,
+            displayName: result.recordset[0].displayName,
+            accountDescription: result.recordset[0].accountDescription,
+            role: {
+              roleId: result.recordset[0].roleId,
+              roleType: result.recordset[0].roleType,
+            },
+          };
+
+          console.log(accountWanbe);
+
+          const { error } = Account.validate(accountWanbe);
+          console.log("account validated in readByUser function");
+
+          if (error)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupted account data in the DB`,
+              errorObj: error,
+            };
+
+          console.log("started resolve");
+
+          resolve(new Account(accountWanbe));
+          console.log("resolved with account");
+        } catch (err) {
+          console.log("we are getting rejected with an error");
+          console.log(err);
+          reject(err);
+        }
+        sql.close();
+      })();
+    });
+  }
+
+  static changeDisplayName(displayName, accountId, email) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        console.log("started try block on changeDisplayName");
+        try {
+          const pool = await sql.connect(con);
+          console.log("opened pool conection");
+          console.log(displayName);
+          console.log(accountId);
+          console.log(email);
+
+          const result = await pool
+            .request()
+            .input("displayName", sql.NVarChar(), displayName)
+            .input("accountId", sql.Int(), accountId)
+            .input("email", sql.NVarChar(), email)
+            .query(
+              `
+              UPDATE stuorgAccount
+              SET displayName = @displayName
+              WHERE accountId = @accountId
               SELECT *
               FROM stuorgUser u
               JOIN stuorgAccount a 
