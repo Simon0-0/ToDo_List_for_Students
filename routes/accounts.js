@@ -5,6 +5,7 @@ const config = require("config");
 const Joi = require("joi");
 const authenticate = require("../middleware/authenticate");
 
+// PUT /api/accounts
 router.put("/:userId", [authenticate], async (req, res) => {
   // res.send(JSON.stringify());
   console.log(`this is token obj `);
@@ -41,6 +42,11 @@ router.put("/:userId", [authenticate], async (req, res) => {
       return res.status(err.statusCode).send(JSON.stringify(err));
     return res.status(500).send(JSON.stringify(err));
   }
+});
+
+// DELETE /api/accounts/:accountid
+router.delete('/:accountid', [], async (req, res) => {
+  return res.send(JSON.stringify({message: `DELETE /api/accounts/${req.params.accountid}`}));
 });
 
 module.exports = router;
