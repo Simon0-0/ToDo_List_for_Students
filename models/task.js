@@ -60,7 +60,7 @@ class Task {
     }
 
     //readByTaskId
-    static readByTaskId(taskId) {
+    static readByTaskId() {
         return new Promise((resolve, reject) => {
             (async () => {
 
@@ -69,7 +69,7 @@ class Task {
                     const pool = await sql.connect(con);
                     //query the db -- account where email = email
                     const result = await pool.request()
-                        .input('taskId', sql.integer(), taskId)
+                        // .input('taskId', sql.integer(), taskId)
                         .query(`
                             SELECT * 
                             FROM stuorgTask st

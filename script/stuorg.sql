@@ -1,4 +1,4 @@
-USE [WAD-MMD-CSD-S21_10407746]
+USE [WAD-MMD-CSD-S21_10407717]
 GO
 
 ALTER TABLE stuorgUserGroup
@@ -120,14 +120,14 @@ CREATE TABLE stuorgPassword
 CREATE TABLE stuorgTask
 (
     taskId INT NOT NULL IDENTITY PRIMARY KEY,
-    FK_labelId INT UNIQUE,
-    FK_ownerId INT UNIQUE,
+    FK_labelId INT,
+    FK_userId INT,
     taskdueDate INT,
     tasksubject NVARCHAR(50),
 
     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
-    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerId) REFERENCES stuorgUser (userId)
+    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
 )
 
 -- GROUP
@@ -182,7 +182,6 @@ INSERT INTO stuorgRole
 VALUES
     ('admin', 'Can freely delate any account or group'),
     ('user', 'can freely edit own account and groups')
-
 GO
 
 INSERT INTO stuorgAccount
@@ -212,6 +211,22 @@ GO
 -- kowalski password: theCold_voidOFtheuniverse
 -- hash $2a$12$kw9QbR8BK7VKiZwJTm.HeORgoTnDdC16E95A/h7N4t8b4HKRynIHq
 
+INSERT INTO stuorgTaskLabel
+    ([labelName], [labelDescription])
+VALUES
+    ('Homework', 'Tasks to do for day-to-day classes.'),
+    ('Project', 'Tasks to do for a project.'),
+    ('Assignment', 'Tasks to do for an assignment.')
+GO
+
+INSERT INTO stuorgTask
+    ([FK_labelId], [FK_userId], [tasksubject])
+VALUES
+    (1, 1, 'Read about SQL'),
+    (2, 1, 'Install modules'),
+    (3, 1, 'Rubric: NASA')
+GO
+
 
 INSERT INTO stuorgPassword
     ([FK_accountId], [hashedPassword])
@@ -225,18 +240,22 @@ GO
 
 
 
-SELECT *
-FROM stuorgUser u
-    JOIN stuorgAccount a
-    ON u.userId = a.FK_userId
-    INNER JOIN stuorgPassword p
-    ON a.accountId = p.FK_accountId
+-- SELECT *
+-- FROM stuorgUser u
+--     JOIN stuorgAccount a
+--     ON u.userId = a.FK_userId
+--     INNER JOIN stuorgPassword p
+--     ON a.accountId = p.FK_accountId
+-- GO
+
+-- SELECT *
+-- FROM stuorgUser u
+--     JOIN stuorgAccount a
+--     ON u.userId = a.FK_userId
+--     JOIN stuorgRole r
+--     ON a.FK_roleId = r.roleId
+-- WHERE u.email = 'heJustTryingToWarnYou@email.com'
+SELECT * 
+    FROM stuorgTask
 GO
 
-SELECT *
-FROM stuorgUser u
-    JOIN stuorgAccount a
-    ON u.userId = a.FK_userId
-    JOIN stuorgRole r
-    ON a.FK_roleId = r.roleId
-WHERE u.email = 'heJustTryingToWarnYou@email.com'
