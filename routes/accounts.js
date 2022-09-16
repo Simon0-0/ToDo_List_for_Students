@@ -44,6 +44,11 @@ router.put("/:userId", [authenticate], async (req, res) => {
   }
 });
 
+//POST route
+router.post('/', async (req, res) => {
+  
+})
+
 // DELETE /api/accounts/:accountid
 router.delete('/:accountid', [], async (req, res) => {
   return res.send(JSON.stringify({message: `DELETE /api/accounts/${req.params.accountid}`}));
