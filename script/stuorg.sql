@@ -98,7 +98,7 @@ CREATE TABLE stuorgAccount
     displayName NVARCHAR (50) NOT NULL,
     accountDescription NVARCHAR (MAX),
     FK_userId INT UNIQUE NOT NULL,
-    FK_roleId INT NOT NULL,
+    FK_roleId INT NOT NULL DEFAULT 2,
 
     CONSTRAINT stuorgFK_Account_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId),
 

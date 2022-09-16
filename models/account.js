@@ -5,7 +5,6 @@ const sql = require("mssql");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 
-//DO WE NEED TO HAVE THE ROLEID AS A FOREIGN KEY IN OUR ACCOUNT MODEL(entity)?
 class Account {
   constructor(accountObj) {
     if (accountObj.accountId) {
@@ -30,9 +29,8 @@ class Account {
     const schema = Joi.object({
       accountId: Joi.number().integer().min(1),
       displayName: Joi.string().max(255).required(),
-      email: Joi.string().max(50).required(),
+      email: Joi.string().max(50).email().required(),
 
-      //.required(),?
       accountDescription: Joi.string().allow(null), //allow null description?
       userId: Joi.number().integer().min(1),
       role: Joi.object({
@@ -111,8 +109,6 @@ class Account {
       })();
     });
   }
-
-  //I am stuck. I get confused between when to use user and account entity, because we dont have our email in the account but in the user
 
   static findAccountByUser(email) {
     return new Promise((resolve, reject) => {
@@ -275,6 +271,105 @@ class Account {
         sql.close();
       })();
     });
+  }
+
+  //CREATE method to create an account
+  //create method
+    // eg.:
+    // const myNewAccount = new Account(accountObj)
+    // myNewAccount.create(password)
+    //
+    create(password) {
+      return new Promise((resolve, reject) => {
+          (async () => {
+              //check if account already exists based on this.email. if found --> reject with error, because the resource already exists!
+              try { //this makes sure that we do not have that account with that email in the db
+                  const account = await Account.findAccountByUser(this.email);
+                  const error = {statusCode: 409, errorMessage: `Account already exists`, errorObj: {} };
+                  reject(error); 
+              } catch (err) {
+                  if (!err.statusCode || err.statusCode != 404) {
+                      reject(err);
+                  }
+              }
+
+              try {
+                  //Open connection to DB
+                  const pool = await sql.connect(con);
+                  //Query the DB with INSERT INTO liloAccount table and SELECT from the liloAccount table by the newly inserted identity
+                  if (!this.email) {
+                    this.email = null;
+                  }
+                  const resultUser = await pool.request()
+                  .input('email', sql.NVarChar(), this.email)
+                  .input('userName', sql.NVarChar, this.userName)
+                  .query(`
+                    INSERT INTO stuorgUser
+                      ([email], [userName])
+                    VALUES
+                      (@email, @userName);
+                    SELECT *
+                    FROM stuorgUser su
+                    WHERE su.userId = SCOPE_IDENTITY()
+                  `)
+
+                  //do we have axactly ONE new line inserted?
+                  if (resultUser.recordset.length != 1) throw {statusCode: 500, errorMessage: `INSERT INTO user table failed`, errorObj: {} };
+
+                  if (!this.displayName) {
+                      this.displayName = null;
+                  }
+                  const resultAccount = await pool.request()
+                  .input('email', sql.NVarChar(), this.email)
+                  .input('displayName', sql.NVarChar(), this.displayName)
+                  .query(`
+                      INSERT INTO stuorgAccount 
+                          ([email], [displayName])
+                      VALUES
+                          (@email, @displayName);
+                      SELECT * 
+                      FROM stuorgAccount sa
+                      WHERE sa.accountId = SCOPE_IDENTITY()
+                  `) //the DB handles the FK_roleid DEFAULT value, set to 2, as of member
+
+                  //do we have axactly ONE new line inserted?
+                  if (resultAccount.recordset.length != 1) throw {statusCode: 500, errorMessage: `INSERT INTO account table failed`, errorObj: {} };
+
+                  //insterting the hashed password into the stuorgPassword
+                  const hashedpassword = bcrypt.hashSync(password);
+                  const accountId = resultAccount.recordset[0].accountId;
+
+                  const resultPassword = await pool.request()
+                      .input('accountId', sql.Int(), accountId)
+                      .input('hashedpassword', sql.NVarChar(), hashedpassword)
+                      .query(`
+                          INSERT INTO stuorgPassword
+                              ([FK_accountId], [hashedpassword])
+                          VALUES
+                              (@accountId, @hashedpassword);
+                          SELECT *
+                          FROM stuorgPassword sp
+                          WHERE sp.FK_accountId = @accountid
+                      `) 
+
+                  //do we have axactly ONE new line inserted?
+                  if (resultPassword.recordset.length != 1) throw {statusCode: 500, errorMessage: `INSERT INTO account table failed`, errorObj: {} };
+                  console.log(resultPassword.recordset[0]);
+
+                  sql.close();
+                  //to do the below, we have to have a closed DB, which is why we do it on the line above
+                  const account = await Account.findAccountByUser(this.email);
+                  resolve(account);
+
+              } catch (err) {
+                  reject(err)
+              }
+              
+              //      close the DB connection
+              sql.close();
+
+          })();
+      })
   }
 }
 
