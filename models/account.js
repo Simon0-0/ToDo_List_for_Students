@@ -4,6 +4,7 @@ const con = config.get("dbConfig_UCN");
 const sql = require("mssql");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
+const { resolve } = require("path");
 
 //DO WE NEED TO HAVE THE ROLEID AS A FOREIGN KEY IN OUR ACCOUNT MODEL(entity)?
 class Account {
@@ -270,6 +271,97 @@ class Account {
         } catch (err) {
           console.log("we are getting rejected with an error");
           console.log(err);
+          reject(err);
+        }
+        sql.close();
+      })();
+    });
+  }
+
+  static deleteAccount(accountId, userId, email) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          console.log("started first try box");
+
+          const findAccountToDelete = await Account.findAccountByUser(email);
+          console.log("called findAccountByUser");
+
+          if (findAccountToDelete.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `Account not found`,
+              errorObj: {},
+            };
+
+          console.log("recordset not 0");
+
+          if (findAccountToDelete.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupt data in DB`,
+              errorObj: {},
+            };
+          console.log("recordset not > 1");
+
+          resolve(findAccountToDelete.recordset[0]);
+          console.log("resolved with account object");
+
+        } catch (err) {
+          reject(err);
+        }
+        try {
+          console.log("started second try box");
+
+          const pool = await sql.connect(con);
+          console.log("create query");
+
+          const response = await pool
+            .request()
+            .input("accountId", sql.Int(), accountId)
+            .input("userId", sql.Int(), userId).query(`
+          DELETE 
+          FROM stuorgUserGroup
+          WHERE FK_userId = @userId
+
+          DELETE 
+          FROM stuorgGroupTask
+          WHERE FK_userId = @userId
+
+          DELETE 
+          FROM stuorgGroup
+          WHERE FK_userId = @userId
+          
+          DELETE 
+          FROM stuorgTask
+          WHERE FK_userId = @userId
+          
+          DELETE 
+          FROM stuorgPassword
+          WHERE FK_accountId = @accountId
+
+          DELETE 
+          FROM stuorgAccount
+          WHERE accountId = @accountId
+
+          DELETE 
+          FROM stuorgUser
+          WHERE userId = @userId
+
+          SELECT *
+          FROM stuorgUser u
+          JOIN stuorgAccount a 
+          ON u.userId = a.FK_userId
+          WHERE u.userId = @userId
+          `);
+
+          console.log("send a query");
+
+          resolve(response.recordset[0]);
+          console.log("resolve with empty object");
+        } catch (err) {
+          console.log("error in accounts");
+
           reject(err);
         }
         sql.close();

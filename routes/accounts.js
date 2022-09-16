@@ -45,8 +45,21 @@ router.put("/:userId", [authenticate], async (req, res) => {
 });
 
 // DELETE /api/accounts/:accountid
-router.delete('/:accountid', [], async (req, res) => {
-  return res.send(JSON.stringify({message: `DELETE /api/accounts/${req.params.accountid}`}));
+router.delete("/:accountid", [authenticate], async (req, res) => {
+  try {
+    const deleteAccount = await Account.deleteAccount(
+      req.account.accountId,
+      req.account.userId,
+      req.account.email
+    );
+    console.log("deleted the account");
+    return res.send(JSON.stringify(deleteAccount));
+  } catch (err) {
+    console.log("we are at the error");
+    if (err.statusCode)
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    return res.status(500).send(JSON.stringify(err));
+  }
 });
 
 module.exports = router;

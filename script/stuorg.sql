@@ -120,13 +120,13 @@ CREATE TABLE stuorgTask
 (
     taskId INT NOT NULL IDENTITY PRIMARY KEY,
     FK_labelId INT UNIQUE,
-    FK_ownerId INT UNIQUE,
+    FK_userId INT UNIQUE,
     taskdueDate INT,
     tasksubject NVARCHAR(50),
 
     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
-    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_ownerId) REFERENCES stuorgUser (userId)
+    CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
 )
 
 -- GROUP
@@ -239,3 +239,4 @@ FROM stuorgUser u
     JOIN stuorgRole r
     ON a.FK_roleId = r.roleId
 WHERE u.email = 'heJustTryingToWarnYou@email.com'
+
