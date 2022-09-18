@@ -6,6 +6,7 @@ const config = require("config");
 const login = require("./routes/login");
 const accounts = require("./routes/accounts");
 const resHeader = require("./middleware/setHeaderResponse");
+const groups = require("./routes/groups");
 
 app.use(express.json());
 const corsOpt = {
@@ -15,6 +16,7 @@ app.use(cors(corsOpt));
 app.use(resHeader);
 app.use("/api/accounts/login", login);
 app.use("/api/accounts", accounts);
+app.use("/api/groups", groups);
 
 app.listen(
   config.get("port"),

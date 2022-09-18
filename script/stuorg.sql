@@ -133,7 +133,8 @@ CREATE TABLE stuorgTask
 CREATE TABLE stuorgGroup
 (
     groupId INT NOT NULL IDENTITY PRIMARY KEY,
-    FK_userId INT UNIQUE,
+    FK_userId INT,
+    groupName NVARCHAR(255) NOT NULL,
     groupDescription NVARCHAR(255) NOT NULL,
 
 
@@ -239,4 +240,8 @@ FROM stuorgUser u
     JOIN stuorgRole r
     ON a.FK_roleId = r.roleId
 WHERE u.email = 'heJustTryingToWarnYou@email.com'
+
+SELECT *
+FROM stuorgGroup 
+
 
