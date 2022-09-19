@@ -5,6 +5,17 @@ const config = require("config");
 const Joi = require("joi");
 const authenticate = require("../middleware/authenticate");
 
+router.post("/", async (req, res) => {
+  try {
+
+    
+  } catch (err) {
+    if (err.statusCode)
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
+
 // PUT /api/accounts
 router.put("/:userId", [authenticate], async (req, res) => {
   // res.send(JSON.stringify());

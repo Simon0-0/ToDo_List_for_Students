@@ -306,7 +306,6 @@ class Account {
 
           resolve(findAccountToDelete.recordset[0]);
           console.log("resolved with account object");
-
         } catch (err) {
           reject(err);
         }
@@ -366,6 +365,16 @@ class Account {
         }
         sql.close();
       })();
+    });
+  }
+
+  static createAccount(password, userId) {
+    return new Promise((resolve, reject)=>{
+      try {
+        
+      } catch (err) {
+        
+      }
     });
   }
 }
