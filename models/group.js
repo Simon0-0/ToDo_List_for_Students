@@ -2,7 +2,6 @@ const config = require("config");
 const con = config.get("dbConfig_UCN");
 const sql = require("mssql");
 const Joi = require("joi");
-const bcrypt = require("bcryptjs");
 const { resolve } = require("path");
 const { reject } = require("lodash");
 

@@ -155,7 +155,7 @@ CREATE TABLE stuorgGroupTask
     CONSTRAINT stuorgFK_GroupTask_Task FOREIGN KEY (FK_taskId) REFERENCES stuorgTask (taskId)
 );
 
---STUORGUSERGROUP
+-- STUORGUSERGROUP
 
 CREATE TABLE stuorgUserGroup
 (
