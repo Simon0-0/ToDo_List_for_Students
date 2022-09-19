@@ -3,6 +3,8 @@ const con = config.get("dbConfig_UCN");
 const sql = require("mssql");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
+const { resolve } = require("path");
+const { reject } = require("lodash");
 
 class Task {
     //constructor
@@ -10,25 +12,21 @@ class Task {
         if (taskObj.taskId) { //if the taskObj has a taskId:
             this.taskId = taskObj.taskId;
         }
-        this.label = {
-            labelId: taskObj.label.labelId
+        if (taskObj.labelId) {
+            this.labelId = taskObj.labelId;
         }
-        if (taskObj.label.labelName) {
-            this.label.labelName = taskObj.label.labelName
-        }
-        this.account = {
-            accountId: taskObj.account.accountId
-        }
-        if (taskObj.account.displayName) {
-            this.account.displayName = taskObj.account.displayName;
+        if (taskObj.userId) {
+            this.userId = taskObj.userId;
         }
         if (taskObj.taskdueDate) {
-            this.taskdueDate = taskObj.taskdueDate;
+            this.taskDueDate = taskObj.taskDueDate;
         }
         if (taskObj.tasksubject) {
             this.tasksubject = taskObj.tasksubject;
         }
+
     }
+
 
     //validate - task object:
     static validationSchema() {
@@ -59,34 +57,48 @@ class Task {
         return schema.validate(taskObj);
     }
 
-    //readByTaskId
-    static readByTaskId() {
+    static getAllTasks() {
         return new Promise((resolve, reject) => {
-            (async () => {
-
-                try {
-                    //open connection to db
-                    const pool = await sql.connect(con);
-                    //query the db -- account where email = email
-                    const result = await pool.request()
-                        // .input('taskId', sql.integer(), taskId)
-                        .query(`
-                            SELECT * 
-                            FROM stuorgTask st
-                            `)
-                            // WHERE st.taskId= @taskId
-                            // INNER JOIN stuorgAccount sa
-                            // ON st.FK_ownerId = sa.displayName
-
-                    resolve();
-                } catch (err) {
-                    //error
-                    reject(err);
-                }
-
-                //close DB
-                sql.close();
-            })();
-        })
-    }
+          (async () => {
+            try {
+    
+              const pool = await sql.connect(con);
+              const response = await pool.request().query(`
+                  SELECT *
+                  FROM stuorgTask
+                  `);
+              if (response.recordset.length == 0)
+                throw {
+                  statusCode: 404,
+                  errorMessage: `no task found in the database`,
+                  errorObj: {},
+                };
+            //   console.log("there is at least 1 task in the database");
+    
+            //   console.log(response);
+            //   console.log("tasks in the DB");
+    
+              let taskArray = [];
+    
+              response.recordset.forEach((task) => {
+                console.log("this is each task");
+                this.validate(task);
+                console.log("validating task");
+                taskArray.push(task);
+                console.log("pushed into the taskArray");
+              });
+    
+              console.log(taskArray);
+              resolve(taskArray);
+            } catch (err) {
+              console.log("we are at the error");
+              reject(err);
+            }
+            sql.close();
+          })();
+        });
+      }
+    
 }
+
+module.exports = Task;
