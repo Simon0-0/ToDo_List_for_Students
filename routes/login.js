@@ -11,8 +11,7 @@ router.post("/", async (req, res) => {
   res.header("Content-type", "application/json");
   console.log("started post");
   try {
-    //now we validate our req.body as credentials
-    //stuck here because im stuck in the Account class in the models folder
+    //now we validate our req.body as credentialsnode
     const { error } = Account.validateCredentials(req.body);
     console.log("validating");
 

@@ -224,7 +224,19 @@ INSERT INTO stuorgTask
 VALUES
     (1, 1, 'Read about SQL'),
     (2, 1, 'Install modules'),
-    (3, 1, 'Rubric: NASA')
+    (3, 1, 'Rubric: NASA'),
+    (1, 3, 'Read about SQL'),
+    (2, 3, 'Install modules'),
+    (3, 3, 'Write essay on Poland'),
+    (1, 2, 'Read about Personas'),
+    (2, 2, 'setup GET endpoint'),
+    (3, 2, 'Rubric: Contactlist'),
+    (1, 4, 'Read about colorwheel'),
+    (2, 4, 'Photoshoot with client'),
+    (3, 4, 'Create video about cold war'),
+    (1, 5, 'Read about design psychology'),
+    (2, 5, 'Poster about Node.js'),
+    (3, 5, 'Create video about cold war')
 GO
 
 
