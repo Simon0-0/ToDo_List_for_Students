@@ -7,8 +7,29 @@ const authenticate = require("../middleware/authenticate");
 
 router.post("/", async (req, res) => {
   try {
+    const schemaPayload = Joi.object({
+      password: Joi.string().required(),
+      userId: Joi.number().integer().min(1).required(),
+      userName: Joi.string().required(),
+    });
 
-    
+    const validPayload = schemaPayload.validate(req.body);
+
+    if (validPayload.error)
+      throw {
+        statusCode: 400,
+        errorMessage: "Badly formatted request payload",
+        errorObj: error,
+      };
+
+
+    const newAccount = await Account.createAccount(
+      req.body.password,
+      req.body.userId,
+      req.body.userName
+    );
+
+    return res.send(JSON.stringify(newAccount));
   } catch (err) {
     if (err.statusCode)
       return res.status(err.statusCode).send(JSON.stringify(err));

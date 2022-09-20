@@ -32,9 +32,7 @@ class Account {
       accountId: Joi.number().integer().min(1),
       displayName: Joi.string().max(255).required(),
       email: Joi.string().max(50).required(),
-
-      //.required(),?
-      accountDescription: Joi.string().allow(null), //allow null description?
+      accountDescription: Joi.string().allow(null),
       userId: Joi.number().integer().min(1),
       role: Joi.object({
         roleId: Joi.number().integer().min(1).required(),
@@ -360,7 +358,6 @@ class Account {
           console.log("resolve with empty object");
         } catch (err) {
           console.log("error in accounts");
-
           reject(err);
         }
         sql.close();
@@ -368,13 +365,105 @@ class Account {
     });
   }
 
-  static createAccount(password, userId) {
-    return new Promise((resolve, reject)=>{
-      try {
-        
-      } catch (err) {
-        
-      }
+  static createAccount(password, userId, userName) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const pool = await sql.connect(con);
+          const checkResult = await pool
+            .request()
+            .input("userName", sql.NVarChar(), userName)
+            .input("userId", sql.Int(), userId).query(`
+
+            SELECT *
+            FROM stuorgAccount
+            WHERE FK_userId = @userId
+            `);
+
+          if (checkResult.recordset.length == 1)
+            throw {
+              statusCode: 401,
+              errorMessage: `Account with this userId: ${userId} already exists`,
+              errorObj: {},
+            };
+          if (checkResult.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `corrupted data in the DB`,
+              errorObj: {},
+            };
+
+          const result = await pool
+            .request()
+            .input("userName", sql.NVarChar(), userName)
+            .input("userId", sql.Int(), userId).query(`
+            INSERT INTO stuorgAccount
+            ([displayName],[FK_userId],[FK_roleId])
+            VALUES
+            (@userName, @userId, 2)
+
+            SELECT *
+            FROM stuorgAccount a
+            JOIN stuorgUser u 
+            ON a.FK_userId = u.userId
+            JOIN stuorgRole r
+            ON a.FK_roleId = r.roleId
+            WHERE accountId = SCOPE_IDENTITY()
+            `);
+
+          if (result.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `Account not found, insert failed`,
+              errorObj: {},
+            };
+          if (result.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `corrupted data in the DB`,
+              errorObj: {},
+            };
+
+          const recivedAccount = result.recordset[0];
+          const accountId = recivedAccount.accountId;
+          console.log(accountId);
+
+          console.log(password);
+
+          const hashedPassword = bcrypt.hashSync(password);
+
+          const resultPassword = await pool
+            .request()
+            .input("password", sql.NVarChar(), hashedPassword)
+            .input("accountId", sql.Int(), accountId).query(`
+              INSERT INTO stuorgPassword
+              ([FK_accountId], [hashedPassword])
+              VALUES
+              (@accountId, @password)
+              `);
+
+
+          const newAccount = {
+            accountId: recivedAccount.accountId,
+            displayName: recivedAccount.displayName,
+            email: recivedAccount.email,
+            accountDescription: recivedAccount.accountDescription,
+            userId: recivedAccount.userId,
+            role: {
+              roleId: recivedAccount.roleId,
+              roleType: recivedAccount.roleType,
+            },
+          };
+
+          Account.validationSchema(newAccount);
+
+          resolve(newAccount);
+          console.log("resolved");
+        } catch (err) {
+          reject(err);
+        }
+        sql.close();
+      })();
     });
   }
 }
