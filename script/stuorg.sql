@@ -1,4 +1,4 @@
-USE [WAD-MMD-CSD-S21_10407746]
+USE [WAD-MMD-CSD-S21_10407748]
 GO
 
 -- ALTER TABLE stuorgUserGroup
@@ -253,5 +253,5 @@ GO
 -- FROM stuorgAccount
 -- WHERE FK_userId = 6
 
-SELECT *
-FROM stuorgUser
+-- SELECT *
+-- FROM stuorgUser

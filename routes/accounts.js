@@ -1,13 +1,58 @@
 const express = require("express");
 const router = express.Router();
+
 const Account = require("../models/account");
-const config = require("config");
+
+const _ = require('lodash');
 const Joi = require("joi");
 
 //holy trinity
 const auth = require("../middleware/authenticate");
 const admin = require("../middleware/admin");
 const check = require("../middleware/checkauthorisation");
+
+// guest:
+// ** POST /api/accounts
+// member:
+// *+ GET [auth] /api/accounts/own - order matters here!
+// *+ PUT [auth] /api/accounts/own - order matters here!
+// admin:
+
+// *+ GET [auth, admin, check] /api/accounts/:accountid
+// *+ PUT [auth, admin, check] /api/accounts/:accountid
+// * DELETE [auth, admin, check] /api/accounts/:accountid
+
+//GET [auth, admin, check] /api/accounts
+router.get('/', [auth, admin, check], async (req, res) => {
+console.log("is here");
+  try {
+      const schema = Joi.object({
+          email: Joi.string()
+              .email(),
+          roleId: Joi.number()
+              .integer()
+              .min(1)
+      }); 
+      const { error } = schema.validate(req.query);
+      if (error) throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: error }
+
+      console.log("somethng");
+      let accounts;
+      if (req.query.email) accounts = await Account.readAll({ query: 'email', value: req.query.email });  
+      if (req.query.roleId && !req.query.email) accounts = await Account.readAll({ query: 'roleId', value: req.query.roleId }); 
+      if (!req.query.roleId && !req.query.email) accounts = await Account.readAll();  
+
+      return res.send(JSON.stringify(accounts));
+
+  } catch (err) { 
+      if (err.statusCode) {  
+          return res.status(err.statusCode).send(JSON.stringify(err));
+      }
+      return res.status(500).send(JSON.stringify(err));   // if no statusCode, send error with status: 500
+  }
+
+ })
+
 
 router.post("/", async (req, res) => {
   try {
@@ -74,44 +119,102 @@ router.get('/:accountId', [auth, admin], async (req, res) => {
 })
 
 
-// PUT /api/accounts
-router.put("/:userId", [auth], async (req, res) => {
-  // res.send(JSON.stringify());
+// PUT /api/accounts/own
+router.put("/own", [auth], async (req, res) => {
+
+
   console.log(`this is token obj `);
   console.log(req.account);
+
+
   try {
-    const changeName = req.body;
-    console.log(`get the new name:`);
-    console.log(changeName);
 
-    const schema = Joi.object({
-      displayName: Joi.string().min(3).required(),
-    });
-    let validChangePayload = schema.validate(changeName);
-    console.log("payload validated");
+    const changeMyName = await Account.findAccountById(req.account.accountId);
 
-    if (validChangePayload.error)
-      throw {
-        statusCode: 400,
-        errorMessage: "Badly formatted request payload",
-        errorObj: error,
-      };
+   if (req.body.accountDescription) {
+        changeMyName.accountDescription = req.body.accountDescription;
+    }
 
-    console.log("no error so far in accounts");
+    let validationResult = Account.validate(changeMyName);
+    if (validationResult.error) throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: validationResult.error }
 
-    const updatedAccount = await Account.changeDisplayName(
-      changeName.displayName,
-      req.account.accountId,
-      req.account.email
-    );
-    return res.send(JSON.stringify(updatedAccount));
-  } catch (err) {
-    console.log("we are at the error");
-    if (err.statusCode)
-      return res.status(err.statusCode).send(JSON.stringify(err));
-    return res.status(500).send(JSON.stringify(err));
-  }
+    
+    const account = await changeMyName.update();
+
+    // if password needs changing, call account.updatePassword(password)
+    if (req.body.password) {
+        // check the raw password
+        const passwordWannabe = _.pick(req.body, ['password']);
+        // schema from POST /api/accounts 
+        const schema = Joi.object({     // passwordWannabe is an object with a password property                
+            password: Joi.string()      //      string
+                .min(3)                 //      minimum 3 characters long
+                .required()             //      and it is required
+        });
+
+        validationResult = schema.validate(passwordWannabe);    // validating the raw password to match the password needs
+        if (validationResult.error) throw { statusCode: 400, errorMessage: `Password does not match requirements`, errorObj: validationResult.error }
+
+        const accountSame = await account.updatePassword(passwordWannabe.password);
+    }
+
+    //respond with account
+    return res.send(JSON.stringify(account));
+
+} catch (err) { // if error
+    if (err.statusCode) {   // if error with statusCode, send error with status: statusCode 
+        return res.status(err.statusCode).send(JSON.stringify(err));
+    }
+    return res.status(500).send(JSON.stringify(err));   // if no statusCode, send error with status: 500
+}
 });
+
+// PUT [auth] /api/accounts/own
+router.put('/:accountId', [auth, admin, check], async (req, res) => {
+
+  try {
+      // validate accountid
+      const schema = Joi.object({
+          accountId: Joi.number()
+              .integer()
+              .min(1)
+              .required()
+      });
+
+      let validationResult = schema.validate(req.params);
+      if (validationResult.error) throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: validationResult.error }
+
+      if (req.account.accountId == req.params.accountId) throw { statusCode: 403, errorMessage: `Request denied: endpoint cannot be used to change account resource, use instead >> PUT /api/accounts/own`, errorObj: {} }
+
+     const accountCurrent = await Account.findAccountById(req.params.accountId);
+
+     
+     if (req.body.displayName) {
+          accountCurrent.displayName = req.body.displayName;
+      }
+      if (req.body.role && req.body.role.roleId) {
+          accountCurrent.role.roleId = req.body.role.roleId;
+      }
+
+      // validate the modified accountCurrent
+      validationResult = Account.validate(accountCurrent);
+      if (validationResult.error) throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: validationResult.error }
+
+      // update the account in the DB
+      const account = await accountCurrent.update();
+
+      //respond with account
+      return res.send(JSON.stringify(account));
+
+  } catch (err) { // if error
+      if (err.statusCode) {   // if error with statusCode, send error with status: statusCode 
+          return res.status(err.statusCode).send(JSON.stringify(err));
+      }
+      return res.status(500).send(JSON.stringify(err));   // if no statusCode, send error with status: 500
+  }
+
+  // return res.send(JSON.stringify({ message: `PUT /api/accounts/${req.params.accountid}` }));
+})
 
 // DELETE /api/accounts/:accountid
 router.delete("/:accountid", [auth], async (req, res) => {

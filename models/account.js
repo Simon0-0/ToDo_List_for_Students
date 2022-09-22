@@ -232,6 +232,86 @@ class Account {
       })();
     })
   }
+  static readAll(queryObj) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          let queryString = `
+                    SELECT *
+                    FROM stuorgAccount ac
+                        INNER JOIN stuorgRole r
+                        ON ac.FK_roleId = r.roleId
+                `;
+
+          let qcolumnname;
+          let qtype;
+          if (queryObj) {
+            switch (queryObj.query) {
+              case ('email'):
+                qcolumnname = 'email';
+                qtype = sql.NVarChar();
+                break;
+              case ('roleId'):
+                qcolumnname = 'FK_roleId';
+                qtype = sql.Int();
+                break;
+              default: break;
+            }
+
+            queryString += `
+                        WHERE ac.${qcolumnname} = @var
+                    ` 
+                  
+                  }
+
+          const pool = await sql.connect(con);    
+
+          
+          let result;
+          if (queryObj) { // if there is a queryObj
+            result = await pool.request()
+              .input('var', qtype, queryObj.value)   
+              .query(queryString)   
+          } else {
+            result = await pool.request()
+              .query(queryString)     // this queryString has no WHERE clause (because there was no queryObj)
+          }
+
+         
+          const accounts = [];
+          result.recordset.forEach(record => {
+           
+            const accountWannabe = {
+              accountId: record.accountId,
+              email: record.email,
+              displayName: record.displayName,
+              role: {
+                roleId: record.roleId,
+                roleType: record.roleType
+              }
+            }
+
+            // after restructuring the record into the object-wannabe, it has to be validated    
+            const { error } = Account.validate(accountWannabe);
+            if (error) throw { statusCode: 500, errorMessage: `Corrupt DB, account does not validate: ${accountWannabe.accountid}`, errorObj: error };
+
+            // push the account into the accounts array
+            accounts.push(new Account(accountWannabe));
+          })
+
+          // resolve with accounts array
+          resolve(accounts);
+
+        } catch (err) {
+          reject(err);
+        }
+
+        sql.close();
+
+      })();   // *** *** *** Immediately Invoked Function Expression (IIFE) --> (function expression)();
+    })
+
+  }
 
   static changeDisplayName(displayName, accountId, email) {
     return new Promise((resolve, reject) => {
