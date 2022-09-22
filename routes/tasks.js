@@ -53,67 +53,39 @@ router.get("/", [authenticate, adminAuth], async (req, res) => {
       return res.status(500).send(JSON.stringify(err));
     }
   });
+  
+  //POST /api/tasks/ - create a new task
+  router.post("/", [authenticate], async (req, res) => {
+    try {
+      const payload = Joi.object({
+        labelId: Joi.number().integer(),
+        taskdueDate: Joi.number(),
+        tasksubject: Joi.string() 
+      })
 
-  //POST /api/tasks/own - create a new task for yourself
-    // router.post("/own", [authenticate], async (req, res) => {
-    //   try {
-    //     console.log("started groups try and catch");
-    //     let validPayload = Task.validate(req.body);
-    //     if (validPayload.error)
-    //       throw {
-    //         statusCode: 400,
-    //         errorMessage: "Badly formatted request",
-    //         errorObj: err,
-    //       };
-    //     console.log("validated users payload");
-    
-    //     const userId = _.pick(req.body, ["userId"]);
-    //     const labelId = _.pick(req.body, ["labelId"]);
-    //     const tasksubject = _.pick(req.body, ["tasksubject"]);
-    
-    //     console.log("parsed payload");
-    
-    //     const task = await Task.create(
-    //       userId,
-    //       labelId,
-    //       tasksubject
-    //     );
-    //     console.log("called function");
-    
-    //     return res.send(JSON.stringify(task));
-    //   } catch (err) {
-    //     if (err.statusCode) {
-    //       return res.status(err.statusCode).send(JSON.stringify(err));
-    //     }
-    //     return res.status(500).send(JSON.stringify(err));
-    //   }
-    // });
-       
+      let validPayload = payload.validate(req.body);
 
-
-  // router.delete("/:groupId/:userId", [authenticate], async (req, res) => {
-  //   try {
-  //     console.log('started removeMember')
-  //     const deletedMember = await Member.leaveGroup(req.params.groupId, req.params.userId);
-  //     return res.send(JSON.stringify(deletedMember));
-  //   } catch (err) {
-  //     if (err.statusCode) {
-  //       return res.status(err.statusCode).send(JSON.stringify(err));
-  //     }
-  //     return res.status(500).send(JSON.stringify(err));
-  //   }
-  // });
-  // router.delete("/:groupId", [authenticate], async (req, res) => {
-  //   try {
-  //     const deletedMember = await Member.leaveGroup(req.params.groupId, req.account.userId);
-  //     return res.send(JSON.stringify(deletedMember));
-  //   } catch (err) {
-  //     if (err.statusCode) {
-  //       return res.status(err.statusCode).send(JSON.stringify(err));
-  //     }
-  //     return res.status(500).send(JSON.stringify(err));
-  //   }
-  // });
-
+      if (validPayload.err)
+        throw {
+          statusCode: 400,
+          errorMessage: "Badly formatted request",
+          errorObj: err,
+        };
+  
+      const task = await Task.createTask(
+        req.account.userId,
+        req.body.labelId,
+        req.body.taskdueDate,
+        req.body.tasksubject
+      );
+  
+      return res.send(JSON.stringify(task));
+    } catch (err) {
+      if (err.statusCode) {
+        return res.status(err.statusCode).send(JSON.stringify(err));
+      }
+      return res.status(500).send(JSON.stringify(err));
+    }
+  });
 
 module.exports = router;
