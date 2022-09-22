@@ -50,13 +50,16 @@ class Account {
     return schema.validate(accountObj);
   }
 
-  //method to check/validate our credentials object. Using password and user entity
   static validateCredentials(credentialsObj) {
     const schema = Joi.object({
-      email: Joi.string().email().max(255).required(),
-      password: Joi.string().required(),
-    });
-    console.log(credentialsObj);
+      email: Joi.string()
+                .email()
+                .required(),
+            password: Joi.string()
+                .min(3)
+                .required()
+    })
+    console.log("credentialsObj");
     return schema.validate(credentialsObj);
   }
 
@@ -111,8 +114,7 @@ class Account {
     });
   }
 
-  //I am stuck. I get confused between when to use user and account entity, because we dont have our email in the account but in the user
-
+ 
   static findAccountByUser(email) {
     return new Promise((resolve, reject) => {
       (async () => {
@@ -189,7 +191,6 @@ class Account {
     });
   }
 
-
   static findAccountById(accountId) {
     return new Promise((resolve, reject) => {
       (async () => {
@@ -209,8 +210,12 @@ class Account {
           if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: `Corrupt DB, mulitple accounts with accountId: ${accountId}`, errorObj: {} };
           if (result.recordset.length == 0) throw { statusCode: 404, errorMessage: `Account not found by accountId: ${accountId}`, errorObj: {} };
 
+          if ((result.recordset.length = 1)) {
+            console.log(`one result found`);
+          }
+
           const accountWanbe = {
-            accountId: result.recordset[0].accountIvd,
+            accountId: result.recordset[0].accountId,
             userId: result.recordset[0].userId,
             email: result.recordset[0].email,
             displayName: result.recordset[0].displayName,
@@ -232,83 +237,51 @@ class Account {
       })();
     })
   }
+
   static readAll(queryObj) {
     return new Promise((resolve, reject) => {
       (async () => {
+
         try {
-          let queryString = `
-                    SELECT *
-                    FROM stuorgAccount ac
-                        INNER JOIN stuorgRole r
-                        ON ac.FK_roleId = r.roleId
-                `;
+          console.log("GET all groups");
 
-          let qcolumnname;
-          let qtype;
-          if (queryObj) {
-            switch (queryObj.query) {
-              case ('email'):
-                qcolumnname = 'email';
-                qtype = sql.NVarChar();
-                break;
-              case ('roleId'):
-                qcolumnname = 'FK_roleId';
-                qtype = sql.Int();
-                break;
-              default: break;
-            }
+          const pool = await sql.connect(con);
+          const response = await pool.request().query(`
+            SELECT *
+            FROM stuorgAccount
+          `);
 
-            queryString += `
-                        WHERE ac.${qcolumnname} = @var
-                    ` 
-                  
-                  }
+          console.log("send SELECT query to the DB");
+          if(response.recordset.length == 0)
+            throw {statusCode:404, errorMessage:`no account found in database`, errorObj:{}};
+          
 
-          const pool = await sql.connect(con);    
+          console.log("there is at least 1 account here");
+
+          let accountArray = [];
+          console.log("created array");
+
+          response.recordset.forEach((account) => {
+            this.validate(account);
+            console.log("validation the account");
+            accountArray.push(account);
+          });
+
 
           
-          let result;
-          if (queryObj) { // if there is a queryObj
-            result = await pool.request()
-              .input('var', qtype, queryObj.value)   
-              .query(queryString)   
-          } else {
-            result = await pool.request()
-              .query(queryString)     // this queryString has no WHERE clause (because there was no queryObj)
-          }
 
-         
-          const accounts = [];
-          result.recordset.forEach(record => {
-           
-            const accountWannabe = {
-              accountId: record.accountId,
-              email: record.email,
-              displayName: record.displayName,
-              role: {
-                roleId: record.roleId,
-                roleType: record.roleType
-              }
-            }
+          console.log(accountArray);
+          resolve(accountArray);
 
-            // after restructuring the record into the object-wannabe, it has to be validated    
-            const { error } = Account.validate(accountWannabe);
-            if (error) throw { statusCode: 500, errorMessage: `Corrupt DB, account does not validate: ${accountWannabe.accountid}`, errorObj: error };
-
-            // push the account into the accounts array
-            accounts.push(new Account(accountWannabe));
-          })
-
-          // resolve with accounts array
-          resolve(accounts);
 
         } catch (err) {
+          console.log("error after readAll");
           reject(err);
         }
 
         sql.close();
 
-      })();   // *** *** *** Immediately Invoked Function Expression (IIFE) --> (function expression)();
+      })();   
     })
 
   }
@@ -590,6 +563,41 @@ class Account {
       })();
     });
   }
+
+  update() {
+    return new Promise((resolve, reject) => {  
+        (async () => {  
+            try {
+                let tmpResult;
+                tmpResult = await Account.findAccountById(this.accountId);     
+
+                const pool = await sql.connect(con);    
+                tmpResult = await pool.request()    
+                    .input('accountId', sql.Int(), this.accountId)   
+                    .input('roleId', sql.Int(), this.role.roleId)
+                    .input('accountDescription', sql.NVarChar(), this.accountDescription)   
+                    .query(`
+                    UPDATE stuorgAccount
+                    SET FK_roleId = @roleId, accountDescription = @accountDescription
+                    WHERE accountId = @accountId
+                `)  
+
+               console.log("tmpResult");
+
+                sql.close();   
+
+                const account = await Account.findAccountById(this.accountId); 
+
+                resolve(account);  
+
+            } catch (err) {
+                reject(err);   
+            } 
+
+            sql.close();    
+        })();   
+    })
+}
 }
 
 module.exports = Account; //in the end, export this to Account

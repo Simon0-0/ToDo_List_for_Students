@@ -227,7 +227,8 @@ class Group {
           const pool = await sql.connect(con);
           const response = await pool
             .request()
-            .input("groupId", sql.Int(), groupId).query(`
+            .input("groupId", sql.Int(), groupId)
+            .query(`
                 SELECT *
                 FROM stuorgGroup
                 WHERE groupId = @groupId
