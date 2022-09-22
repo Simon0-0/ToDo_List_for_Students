@@ -2,6 +2,8 @@ const config = require("config");
 const con = config.get("dbConfig_UCN");
 const sql = require("mssql");
 const Joi = require("joi");
+const { resolve } = require("path");
+const { reject } = require("lodash");
 
 class User {
   constructor(userObj) {
@@ -48,7 +50,7 @@ class User {
               errorObj: {},
             };
 
-            if (checkresult.recordset.length > 1)
+          if (checkresult.recordset.length > 1)
             throw {
               statusCode: 500,
               errorMessage: `corrupted data in the DB`,
@@ -82,11 +84,48 @@ class User {
               errorObj: {},
             };
 
-            resolve(result.recordset[0])
+          resolve(result.recordset[0]);
         } catch (err) {
-            reject(err)
+          reject(err);
         }
         sql.close();
+      })();
+    });
+  }
+
+  static getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const pool = await sql.connect(con);
+          const result = await pool
+            .request()
+            .input("email", sql.NVarChar(), email).query(`
+          SELECT *
+            FROM stuorgUser
+            WHERE email = @email
+          `);
+          if (result.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `user with this email does not exists in the database`,
+              errorObj: {},
+            };
+
+          if (result.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `corrupted data in the DB`,
+              errorObj: {},
+            };
+
+          const user = result.recordset[0];
+          this.validate(user);
+
+          resolve(user);
+        } catch (err) {
+          reject(err);
+        }
       })();
     });
   }
