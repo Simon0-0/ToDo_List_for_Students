@@ -9,6 +9,7 @@ const resHeader = require("./middleware/setHeaderResponse");
 const groups = require("./routes/groups");
 const members = require("./routes/members");
 const users = require("./routes/users");
+const tasks = require("./routes/tasks");
 
 app.use(express.json());
 const corsOpt = {
@@ -21,6 +22,7 @@ app.use("/api/accounts", accounts);
 app.use("/api/groups", groups);
 app.use("/api/groupmembers", members);
 app.use("/api/users", users);
+app.use("/api/tasks", tasks);
 
 app.listen(
   config.get("port"),
