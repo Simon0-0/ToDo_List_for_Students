@@ -216,7 +216,7 @@ GO
 -- INSERT INTO stuorgPassword
 --     ([FK_accountId], [hashedPassword])
 -- VALUES
---     (1, '$2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw'),
+--     (1, '$2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw.'),
 --     (2, '$2a$12$E5.f.BTcTNSJO9q5RextN.zHo/cVZF05GB8JfLDKn2OAeAWeJQuGe'),
 --     (3, '$2a$12$1g/I0l6EDy77tlnsRhbJOuTOF5ieUT2.67sSKzB7TAV0G3FdN4dLm'),
 --     (4, '$2a$12$v472RLlX39Hb.9KhdCAcVuASCWFca6Jfs6PQTeMAUt9zZZUq7oQN.'),
@@ -249,9 +249,10 @@ GO
 -- FROM stuorgAccount
 
 
--- DELETE 
--- FROM stuorgAccount
--- WHERE FK_userId = 6
-
-SELECT *
+SELECT * 
 FROM stuorgUser
+
+
+-- SELECT *
+-- FROM stuorgUser
+

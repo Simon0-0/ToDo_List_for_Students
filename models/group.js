@@ -11,6 +11,7 @@ class Group {
       this.groupId = groupObj.groupId;
     }
     this.userId = groupObj.userId;
+    this.userName = groupObj.userName;
     this.groupName = groupObj.groupName;
     this.groupDescription = groupObj.groupDescription;
   }
@@ -19,6 +20,7 @@ class Group {
     const schema = Joi.object({
       groupId: Joi.number().integer().min(1),
       userId: Joi.number().integer().min(1),
+      userName: Joi.string().max(255),
       groupName: Joi.string().max(255),
       groupDescription: Joi.string().max(255),
     });
@@ -229,12 +231,22 @@ class Group {
             .request()
             .input("groupId", sql.Int(), groupId).query(`
                 SELECT *
-                FROM stuorgGroup
+                FROM stuorgGroup g
+                JOIN stuorgUser u
+                ON g.FK_userId = u.userId
                 WHERE groupId = @groupId
                 `);
 
           console.log("send SELECT query to the DB");
-          if (response.recordset.length != 1)
+          if (response.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `no group found with id: ${groupId}`,
+              errorObj: {},
+            };
+          console.log("there is at exactly 1 group in the database");
+
+          if (response.recordset.length > 1)
             throw {
               statusCode: 401,
               errorMessage: `corrupted data in the DB`,
@@ -245,7 +257,14 @@ class Group {
           console.log(response);
           console.log("groups in the DB");
 
-          const group = response.recordset[0];
+          const group = {
+            groupId: response.recordset[0].groupId,
+            userId: response.recordset[0].userId,
+            userName: response.recordset[0].userName,
+            groupName: response.recordset[0].groupName,
+            groupDescription: response.recordset[0].groupDescription,
+          };
+
           console.log("response");
           console.log(group);
 

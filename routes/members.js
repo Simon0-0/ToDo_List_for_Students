@@ -7,6 +7,19 @@ const authenticate = require("../middleware/authenticate");
 const adminAuth = require("../middleware/admin");
 const Joi = require("joi");
 
+router.get("/membership", [authenticate], async (req, res) => {
+  try {
+    const membershipArray = await Member.getAllMemberships(req.account.userId);
+    console.log("called function");
+    console.log(membershipArray);
+    return res.send(JSON.stringify(membershipArray));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    }
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 router.get("/:groupId", [authenticate], async (req, res) => {
   try {
     const memberArray = await Member.getAllGroupMembers(req.params.groupId);
@@ -48,10 +61,14 @@ router.post("/:groupId", [authenticate], async (req, res) => {
   }
 });
 
-router.delete("/:groupId/:userId", [authenticate], async (req, res) => {
+router.delete("/:groupId/:email", [authenticate], async (req, res) => {
   try {
-    console.log('started removeMember')
-    const deletedMember = await Member.leaveGroup(req.params.groupId, req.params.userId);
+    console.log("started removeMember");
+    const deletedMember = await Member.removeMember(
+      req.account.userId,
+      req.params.groupId,
+      req.params.email
+    );
     return res.send(JSON.stringify(deletedMember));
   } catch (err) {
     if (err.statusCode) {
@@ -62,7 +79,10 @@ router.delete("/:groupId/:userId", [authenticate], async (req, res) => {
 });
 router.delete("/:groupId", [authenticate], async (req, res) => {
   try {
-    const deletedMember = await Member.leaveGroup(req.params.groupId, req.account.userId);
+    const deletedMember = await Member.leaveGroup(
+      req.params.groupId,
+      req.account.userId
+    );
     return res.send(JSON.stringify(deletedMember));
   } catch (err) {
     if (err.statusCode) {
@@ -72,5 +92,5 @@ router.delete("/:groupId", [authenticate], async (req, res) => {
   }
 });
 
-
 module.exports = router;
+

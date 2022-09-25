@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /api/accounts
-router.put("/:userId", [authenticate], async (req, res) => {
+router.put("/own", [authenticate], async (req, res) => {
   // res.send(JSON.stringify());
   console.log(`this is token obj `);
   console.log(req.account);
