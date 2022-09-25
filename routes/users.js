@@ -1,38 +1,47 @@
-//require modules
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/authenticate')
-//const authenticate = require('../middleware/authenticate'); - NOT CREATED
-//const admin = require('../middleware/admin'); - NOT CREATED
+const config = require("config");
+const con = config.get("dbConfig_UCN");
+const sql = require("mssql");
+const Joi = require("joi");
+const authenticate = require("../middleware/authenticate");
+const router = require("./members");
+const User = require("../models/user");
 
-//GET endpoint
-router.get('/', (req, res) => {
-    res.header('Content-type', 'application/json');
+router.get('/email/:email', async (req, res)=>{
+  try {
+    console.log('started get userbyemail')
+    const user = await User.getUserByEmail(req.params.email);
+    return res.send(JSON.stringify(user));
+  } catch (err) {
+    if (err.statusCode)
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    return res.status(500).send(JSON.stringify(err));
+  }
+})
 
-    console.log(req.account);
-    res.send(JSON.stringify({message: 'This is GET /api/profiles'}));
-}); 
+router.post("/", async (req, res) => {
+  try {
+    const payloadValidation = Joi.object({
+      userName: Joi.string().max(255).required(),
+      email: Joi.string().max(255).required(),
+    });
 
-//POST endpoint
-router.post('/', [auth], (req, res) => {//adjust to our project
-    res.header('Content-type', 'application/json');
+    let validPayload = payloadValidation.validate(req.body);
+    if(validPayload.error)throw {
+      statusCode: 400,
+      errorMessage: "Badly formatted request",
+      errorObj: err,
+    };
 
-    console.log(req.account);
-    res.send(JSON.stringify({message: 'This is POST /api/profiles'}));
-});
+    const newUserName = req.body.userName;
+    const newEmail = req.body.email;
 
-//PUT endpoint
-router.put('/:profileid', [auth], (req, res) => {//adjust to our project
-    res.header('Content-type', 'application/json');
-
-    res.send(JSON.stringify({message: `This is PUT /api/profiles/${req.params.profileid}`}));
-});
-
-//DELETE endpoint
-router.delete('/:profileid', [auth], (req, res) => {//adjust to our project
-    res.header('Content-type', 'application/json');
-
-    res.send(JSON.stringify({message: `This is DELETE /api/profiles/${req.params.profileid}`}));
+    const newUser = await User.createUser(newEmail, newUserName);
+    return res.send(JSON.stringify(newUser));
+  } catch (err) {
+    if (err.statusCode)
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    return res.status(500).send(JSON.stringify(err));
+  }
 });
 
 module.exports = router;
