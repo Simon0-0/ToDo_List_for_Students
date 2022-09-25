@@ -5,6 +5,7 @@ const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const { resolve } = require("path");
 const { reject } = require("lodash");
+const { stringify } = require("querystring");
 
 class Task {
   //constructor
@@ -155,6 +156,16 @@ class Task {
     return new Promise((resolve, reject) => {
       (async () => {
         console.log("started 1 try block on create task");
+        console.log("userId");
+        console.log(userId);
+        console.log("labelId");
+        console.log(labelId);
+        console.log("taskdueDate");
+        console.log(taskdueDate);
+        console.log("tasksubject");
+        console.log(tasksubject);
+        // const subject = JSON.stringify(tasksubject)
+        // console.log(subject)
         try {
           const pool = await sql.connect(con);
           console.log("connected to the database");

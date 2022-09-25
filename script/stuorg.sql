@@ -1,4 +1,4 @@
-USE [WAD-MMD-CSD-S21_10407717]
+USE [WAD-MMD-CSD-S21_10407746]
 GO
 
 -- ALTER TABLE stuorgUserGroup
@@ -122,8 +122,8 @@ GO
 --     taskId INT NOT NULL IDENTITY PRIMARY KEY,
 --     FK_labelId INT,
 --     FK_userId INT,
---     taskdueDate INT,
---     tasksubject NVARCHAR(50),
+--     taskdueDate BIGINT,
+--     tasksubject NVARCHAR(255),
 
 --     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
@@ -196,20 +196,20 @@ GO
 
 
 
--- -- john password: lookingFor_love
--- -- hash $2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw.
+-- -- -- -- john password: lookingFor_love
+-- -- -- -- hash $2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw.
 
--- -- alice pasword: aliceLovesPotatoes
--- -- hash $2a$12$E5.f.BTcTNSJO9q5RextN.zHo/cVZF05GB8JfLDKn2OAeAWeJQuGe
+-- -- -- -- alice pasword: aliceLovesPotatoes
+-- -- -- -- hash $2a$12$E5.f.BTcTNSJO9q5RextN.zHo/cVZF05GB8JfLDKn2OAeAWeJQuGe
 
--- -- mothman password: theBRIDGEEEEEEEEEEE
--- -- hash $2a$12$1g/I0l6EDy77tlnsRhbJOuTOF5ieUT2.67sSKzB7TAV0G3FdN4dLm
+-- -- -- -- mothman password: theBRIDGEEEEEEEEEEE
+-- -- -- -- hash $2a$12$1g/I0l6EDy77tlnsRhbJOuTOF5ieUT2.67sSKzB7TAV0G3FdN4dLm
 
--- -- lochNessMonster password: girlBO$$
--- -- hash $2a$12$v472RLlX39Hb.9KhdCAcVuASCWFca6Jfs6PQTeMAUt9zZZUq7oQN.
+-- -- -- -- lochNessMonster password: girlBO$$
+-- -- -- -- hash $2a$12$v472RLlX39Hb.9KhdCAcVuASCWFca6Jfs6PQTeMAUt9zZZUq7oQN.
 
--- -- kowalski password: theCold_voidOFtheuniverse
--- -- hash $2a$12$kw9QbR8BK7VKiZwJTm.HeORgoTnDdC16E95A/h7N4t8b4HKRynIHq
+-- -- -- -- kowalski password: theCold_voidOFtheuniverse
+-- -- -- -- hash $2a$12$kw9QbR8BK7VKiZwJTm.HeORgoTnDdC16E95A/h7N4t8b4HKRynIHq
 
 -- INSERT INTO stuorgTaskLabel
 --     ([labelName], [labelDescription])
@@ -252,22 +252,24 @@ GO
 
 
 
--- -- SELECT *
--- -- FROM stuorgUser u
--- --     JOIN stuorgAccount a
--- --     ON u.userId = a.FK_userId
--- --     INNER JOIN stuorgPassword p
--- --     ON a.accountId = p.FK_accountId
--- -- GO
+-- SELECT *
+-- FROM stuorgUser u
+--     JOIN stuorgAccount a
+--     ON u.userId = a.FK_userId
+--     INNER JOIN stuorgPassword p
+--     ON a.accountId = p.FK_accountId
+-- GO
 
--- -- SELECT *
--- -- FROM stuorgUser u
--- --     JOIN stuorgAccount a
--- --     ON u.userId = a.FK_userId
--- --     JOIN stuorgRole r
--- --     ON a.FK_roleId = r.roleId
--- -- WHERE u.email = 'heJustTryingToWarnYou@email.com'
+-- SELECT *
+-- FROM stuorgUser u
+--     JOIN stuorgAccount a
+--     ON u.userId = a.FK_userId
+--     JOIN stuorgRole r
+--     ON a.FK_roleId = r.roleId
+-- WHERE u.email = 'heJustTryingToWarnYou@email.com'
+-- SELECT *
+-- FROM stuorgTask
+-- GO
+
 SELECT *
 FROM stuorgTask
-GO
-
