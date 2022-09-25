@@ -4,7 +4,6 @@ const router = express.Router();
 //require our Account class from models
 const Account = require("../models/account");
 const jwt = require("jsonwebtoken");
-//we need the const jwt = require('jsonwebtoken'); here but i forget if it is a module or what it is, and if we have then installed it?
 const config = require("config");
 
 //POST endpoint
@@ -12,8 +11,7 @@ router.post("/", async (req, res) => {
   res.header("Content-type", "application/json");
   console.log("started post");
   try {
-    //now we validate our req.body as credentials
-    //stuck here because im stuck in the Account class in the models folder
+    //now we validate our req.body as credentialsnode
     const { error } = Account.validateCredentials(req.body);
     console.log("validating");
 
