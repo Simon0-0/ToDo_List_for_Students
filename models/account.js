@@ -152,7 +152,7 @@ class Account {
           if ((result.recordset.length = 1)) {
             console.log(`one result found`);
           }
-
+          console.log(" before accountWanbe");
           const accountWanbe = {
             accountId: result.recordset[0].accountId,
             userId: result.recordset[0].userId,

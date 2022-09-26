@@ -186,6 +186,51 @@ router.put("/own", [auth], async (req, res) => {
   }
 });
 
+
+// PUT [auth, admin, check] /api/accounts/email
+router.put('/email/:email', [auth, admin], async (req, res) => {
+  console.log("start of the PUT");
+    try {
+  
+      const schema = Joi.object({
+        email: Joi.string()
+          .email()
+          .required()
+      });
+  console.log("we are at schema email");
+      let validationResult = schema.validate(req.params);
+      if (validationResult.error)
+        throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: validationResult.error }
+  
+      if (req.account.email == req.params.email) throw { statusCode: 403, errorMessage: `Request denied: endpoint cannot be used to change account resource, use instead >> PUT /api/accounts/other email`, errorObj: {} }
+  
+      const accountCurrent = await Account.findAccountByUser(req.params.email);
+  console.log(accountCurrent);
+  
+      if (req.body.role && req.body.role.roleId) {
+        accountCurrent.role.roleId = req.body.role.roleId;
+      }
+  
+      // validate the modified accountCurrent
+      validationResult = Account.validate(accountCurrent);
+      if (validationResult.error) throw { statusCode: 400, errorMessage: `Badly formatted request`, errorObj: validationResult.error }
+  
+      // update the account in the DB
+      const account = await accountCurrent.update();
+  
+      //respond with account
+      return res.send(JSON.stringify(account));
+  
+    } catch (err) { // if error
+      if (err.statusCode) {   // if error with statusCode, send error with status: statusCode 
+        return res.status(err.statusCode).send(JSON.stringify(err));
+      }
+      return res.status(500).send(JSON.stringify(err));   // if no statusCode, send error with status: 500
+    }
+  
+    // return res.send(JSON.stringify({ message: `PUT /api/accounts/${req.params.accountid}` }));
+  })
+
 // PUT [auth, admin, check] /api/accounts/:accountid
 router.put('/:accountId', [auth, admin, check], async (req, res) => {
 
@@ -233,6 +278,8 @@ router.put('/:accountId', [auth, admin, check], async (req, res) => {
 
   // return res.send(JSON.stringify({ message: `PUT /api/accounts/${req.params.accountid}` }));
 })
+
+
 //PUT things no more//
 
 
