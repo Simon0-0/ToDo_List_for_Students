@@ -5,6 +5,7 @@ const Joi = require("joi");
 const { resolve } = require("path");
 const { reject } = require("lodash");
 
+
 class User {
   constructor(userObj) {
     if (userObj.userId) {
@@ -92,6 +93,7 @@ class User {
       })();
     });
   }
+
 
   static getUserByEmail(email) {
     return new Promise((resolve, reject) => {

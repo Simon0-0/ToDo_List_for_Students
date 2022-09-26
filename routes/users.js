@@ -18,6 +18,7 @@ router.get('/email/:email', async (req, res)=>{
   }
 })
 
+
 router.post("/", async (req, res) => {
   try {
     const payloadValidation = Joi.object({

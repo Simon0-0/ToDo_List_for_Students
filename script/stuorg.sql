@@ -1,3 +1,4 @@
+
 USE [WAD-MMD-CSD-S21_10407746]
 GO
 
@@ -76,9 +77,7 @@ CREATE TABLE stuorgTaskLabel
 (
     labelId INT NOT NULL IDENTITY PRIMARY KEY,
     -- Primary key: labelid
-
     labelName NVARCHAR (50) NOT NULL,
-
     labelDescription NVARCHAR (255) NOT NULL
 );
 
@@ -127,7 +126,6 @@ CREATE TABLE stuorgTask
     taskdueDate BIGINT,
     tasksubject NVARCHAR(255),
 
-
     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
     CONSTRAINT stuorgFK_task_user FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId)
@@ -137,10 +135,8 @@ CREATE TABLE stuorgTask
 CREATE TABLE stuorgGroup
 (
     groupId INT NOT NULL IDENTITY PRIMARY KEY,
-
     FK_userId INT,
     groupName NVARCHAR(255) NOT NULL,
-
     groupDescription NVARCHAR(255) NOT NULL,
 
 
@@ -161,9 +157,7 @@ CREATE TABLE stuorgGroupTask
     CONSTRAINT stuorgFK_GroupTask_Task FOREIGN KEY (FK_taskId) REFERENCES stuorgTask (taskId)
 );
 
-
 --STUORGUSERGROUP
-
 
 CREATE TABLE stuorgUserGroup
 (
@@ -245,6 +239,7 @@ VALUES
     (3, 5, 'Create video about cold war')
 GO
 
+
 -- john password: lookingFor_love
 -- hash $2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw.
 
@@ -259,7 +254,6 @@ GO
 
 -- kowalski password: theCold_voidOFtheuniverse
 -- hash $2a$12$kw9QbR8BK7VKiZwJTm.HeORgoTnDdC16E95A/h7N4t8b4HKRynIHq
-
 
 
 INSERT INTO stuorgPassword
@@ -290,6 +284,7 @@ FROM stuorgUser u
     ON a.FK_roleId = r.roleId
 WHERE u.email = 'heJustTryingToWarnYou@email.com'
 
+
 SELECT *
 FROM stuorgTask
 GO
@@ -310,5 +305,6 @@ FROM stuorgUser
 
 SELECT *
 FROM stuorgUser
+
 
 

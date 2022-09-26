@@ -70,3 +70,4 @@ GO
 SELECT * 
 FROM stuorgUser
 WHERE userId = 1
+

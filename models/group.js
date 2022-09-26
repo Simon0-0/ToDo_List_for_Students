@@ -229,6 +229,7 @@ class Group {
           const pool = await sql.connect(con);
           const response = await pool
             .request()
+
             .input("groupId", sql.Int(), groupId).query(`
                 SELECT *
                 FROM stuorgGroup g
@@ -245,7 +246,6 @@ class Group {
               errorObj: {},
             };
           console.log("there is at exactly 1 group in the database");
-
           if (response.recordset.length > 1)
             throw {
               statusCode: 401,

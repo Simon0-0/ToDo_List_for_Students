@@ -163,7 +163,6 @@ class Member {
             groupMembers: membersArray,
           };
 
-          console.log(responseObj);
 
           const responseobjSchema = Joi.object({
             groupName: Joi.string(),
@@ -192,7 +191,6 @@ class Member {
           console.log("started delete");
           console.log(userId);
           const pool = await sql.connect(con);
-
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)
@@ -347,6 +345,7 @@ class Member {
       })();
     });
   }
+
 
   static getAllMemberships(userId) {
     return new Promise((resolve, reject) => {
