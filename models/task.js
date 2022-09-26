@@ -260,6 +260,55 @@ class Task {
     });
   }
 
+  static deleteTask(userId, taskId) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const pool = await sql.connect(con);
+          console.log("opened connection to the DB");
+          const result = await pool
+            .request()
+            .input("userId", sql.Int(), userId)
+            .input("taskId", sql.Int(), taskId).query(`
+            SELECT *
+            FROM stuorgTask
+            WHERE taskId = @taskId
+            AND FK_userId = @userId
+
+            DELETE 
+            FROM stuorgGroupTask
+            WHERE FK_taskId = @taskId
+
+            DELETE 
+            FROM stuorgTask
+            WHERE taskId = @taskId
+            AND FK_userId = @userId
+            `);
+
+          console.log("send query");
+
+          if (result.recordset.length != 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `corrupted data in the DB`,
+              errorObj: {},
+            };
+
+          console.log("result is 1");
+
+          const task = result.recordset[0];
+          console.log(task);
+          this.validate(task);
+          resolve(task);
+        } catch (err) {
+          console.log("we are at the error");
+          reject(err);
+        }
+        sql.close();
+      })();
+    });
+  }
+
 }
 
 module.exports = Task;
