@@ -330,7 +330,6 @@ class Group {
         try {
           const pool = await sql.connect(con);
           console.log("opened connection to the DB");
-
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)
@@ -341,8 +340,13 @@ class Group {
             AND FK_userId = @userId
 
             DELETE 
+            FROM stuorgUserGroup
+            WHERE FK_groupId = @groupId
+
+            DELETE 
             FROM stuorgGroup
             WHERE groupId = @groupId
+            AND FK_userId = @userId
             `);
           console.log("send query");
 

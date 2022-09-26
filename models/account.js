@@ -6,7 +6,6 @@ const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const { resolve } = require("path");
 
-
 //DO WE NEED TO HAVE THE ROLEID AS A FOREIGN KEY IN OUR ACCOUNT MODEL(entity)?
 class Account {
   constructor(accountObj) {
@@ -51,8 +50,6 @@ class Account {
     return schema.validate(accountObj);
   }
 
-
-  
   static validateCredentials(credentialsObj) {
     const schema = Joi.object({
       email: Joi.string().email().max(255).required(),
@@ -191,15 +188,14 @@ class Account {
     });
   }
 
-
   static findAccountById(accountId) {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
           const pool = await sql.connect(con);
-          const result = await pool.request()
-            .input('accountId', sql.Int(), accountId)
-            .query(`
+          const result = await pool
+            .request()
+            .input("accountId", sql.Int(), accountId).query(`
           SELECT *
           FROM stuorgAccount ac
             JOIN stuorgRole r
@@ -207,9 +203,19 @@ class Account {
             INNER JOIN stuorgUser u
             ON ac.FK_userId = u.userId
           WHERE ac.accountId = @accountId
-          `)
-          if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: `Corrupt DB, mulitple accounts with accountId: ${accountId}`, errorObj: {} };
-          if (result.recordset.length == 0) throw { statusCode: 404, errorMessage: `Account not found by accountId: ${accountId}`, errorObj: {} };
+          `);
+          if (result.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupt DB, mulitple accounts with accountId: ${accountId}`,
+              errorObj: {},
+            };
+          if (result.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `Account not found by accountId: ${accountId}`,
+              errorObj: {},
+            };
 
           if ((result.recordset.length = 1)) {
             console.log(`one result found`);
@@ -223,11 +229,16 @@ class Account {
             accountDescription: result.recordset[0].accountDescription,
             role: {
               roleId: result.recordset[0].roleId,
-              roleType: result.recordset[0].roleType
-            }
-          }
+              roleType: result.recordset[0].roleType,
+            },
+          };
           const { error } = Account.validate(accountWanbe);
-          if (error) throw { statusCode: 500, errorMessage: `Corrupt DB, account does not validate: ${accountWanbe.accountid}`, errorObj: error };
+          if (error)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupt DB, account does not validate: ${accountWanbe.accountid}`,
+              errorObj: error,
+            };
 
           resolve(new Account(accountWanbe));
         } catch (err) {
@@ -236,13 +247,12 @@ class Account {
 
         sql.close();
       })();
-    })
+    });
   }
 
   static readAll(queryObj) {
     return new Promise((resolve, reject) => {
       (async () => {
-
         try {
           console.log("GET all groups");
 
@@ -253,9 +263,12 @@ class Account {
           `);
 
           console.log("send SELECT query to the DB");
-          if(response.recordset.length == 0)
-            throw {statusCode:404, errorMessage:`no account found in database`, errorObj:{}};
-          
+          if (response.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `no account found in database`,
+              errorObj: {},
+            };
 
           console.log("there is at least 1 account here");
 
@@ -268,54 +281,121 @@ class Account {
             accountArray.push(account);
           });
 
-
-          
-
           console.log(accountArray);
           resolve(accountArray);
-
-
         } catch (err) {
           console.log("error after readAll");
           reject(err);
         }
 
         sql.close();
-
-      })();   
-    })
-
+      })();
+    });
   }
 
-
-  static changeDisplayName(displayName, accountId, email) {
+  static changeDisplayName(userId, displayName) {
     return new Promise((resolve, reject) => {
       (async () => {
         console.log("started try block on changeDisplayName");
         try {
           const pool = await sql.connect(con);
           console.log("opened pool conection");
-          console.log(displayName);
-          console.log(accountId);
-          console.log(email);
-
           const result = await pool
             .request()
             .input("displayName", sql.NVarChar(), displayName)
-            .input("accountId", sql.Int(), accountId)
-            .input("email", sql.NVarChar(), email)
+            .input("userId", sql.Int(), userId)
             .query(
               `
               UPDATE stuorgAccount
               SET displayName = @displayName
-              WHERE accountId = @accountId
+              WHERE FK_userId = @userId
               SELECT *
               FROM stuorgUser u
               JOIN stuorgAccount a 
               ON u.userId = a.FK_userId
               JOIN stuorgRole r
               ON a.FK_roleId = r.roleId
-              WHERE u.email = @email
+              WHERE u.userId = @userId
+              `
+            );
+          console.log("send the query to the datebase");
+
+          if (result.recordset.length == 0)
+            throw {
+              statusCode: 404,
+              errorMessage: `Account not found`,
+              errorObj: {},
+            };
+          if (result.recordset.length > 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupt data in DB`,
+              errorObj: {},
+            };
+          if ((result.recordset.length = 1)) {
+            console.log(`one result found`);
+          }
+
+          const accountWanbe = {
+            accountId: result.recordset[0].accountId,
+            userId: result.recordset[0].userId,
+            email: result.recordset[0].email,
+            displayName: result.recordset[0].displayName,
+            accountDescription: result.recordset[0].accountDescription,
+            role: {
+              roleId: result.recordset[0].roleId,
+              roleType: result.recordset[0].roleType,
+            },
+          };
+
+          console.log(accountWanbe);
+
+          const { error } = Account.validate(accountWanbe);
+          console.log("account validated in readByUser function");
+
+          if (error)
+            throw {
+              statusCode: 500,
+              errorMessage: `Corrupted account data in the DB`,
+              errorObj: error,
+            };
+
+          console.log("started resolve");
+
+          resolve(new Account(accountWanbe));
+          console.log("resolved with account");
+        } catch (err) {
+          console.log("we are getting rejected with an error");
+          console.log(err);
+          reject(err);
+        }
+        sql.close();
+      })();
+    });
+  }
+  static changeAccountDescription(userId, accountDescription) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        console.log("started try block on changeAccountDescription");
+        try {
+          const pool = await sql.connect(con);
+          console.log("opened pool conection");
+          const result = await pool
+            .request()
+            .input("accountDescription", sql.NVarChar(), accountDescription)
+            .input("userId", sql.Int(), userId)
+            .query(
+              `
+              UPDATE stuorgAccount
+              SET accountDescription = @accountDescription
+              WHERE FK_userId = @userId
+              SELECT *
+              FROM stuorgUser u
+              JOIN stuorgAccount a 
+              ON u.userId = a.FK_userId
+              JOIN stuorgRole r
+              ON a.FK_roleId = r.roleId
+              WHERE u.userId = @userId
               `
             );
 
@@ -473,7 +553,7 @@ class Account {
             .request()
             .input("userName", sql.NVarChar(), userName)
             .input("userId", sql.Int(), userId).query(`
-
+  
             SELECT *
             FROM stuorgAccount
             WHERE FK_userId = @userId
@@ -491,7 +571,6 @@ class Account {
               errorMessage: `corrupted data in the DB`,
               errorObj: {},
             };
-
           const result = await pool
             .request()
             .input("userName", sql.NVarChar(), userName)
@@ -500,7 +579,7 @@ class Account {
             ([displayName],[FK_userId],[FK_roleId])
             VALUES
             (@userName, @userId, 2)
-
+  
             SELECT *
             FROM stuorgAccount a
             JOIN stuorgUser u 
@@ -522,7 +601,6 @@ class Account {
               errorMessage: `corrupted data in the DB`,
               errorObj: {},
             };
-
           const recivedAccount = result.recordset[0];
           const accountId = recivedAccount.accountId;
           console.log(accountId);
@@ -535,12 +613,11 @@ class Account {
             .request()
             .input("password", sql.NVarChar(), hashedPassword)
             .input("accountId", sql.Int(), accountId).query(`
-              INSERT INTO stuorgPassword
-              ([FK_accountId], [hashedPassword])
-              VALUES
-              (@accountId, @password)
-              `);
-
+                INSERT INTO stuorgPassword
+                ([FK_accountId], [hashedPassword])
+                VALUES
+                (@accountId, @password)
+                `);
 
           const newAccount = {
             accountId: recivedAccount.accountId,
@@ -566,42 +643,43 @@ class Account {
     });
   }
 
-
   update() {
-    return new Promise((resolve, reject) => {  
-        (async () => {  
-            try {
-                let tmpResult;
-                tmpResult = await Account.findAccountById(this.accountId);     
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          let tmpResult;
+          tmpResult = await Account.findAccountById(this.accountId);
 
-                const pool = await sql.connect(con);    
-                tmpResult = await pool.request()    
-                    .input('accountId', sql.Int(), this.accountId)   
-                    .input('roleId', sql.Int(), this.role.roleId)
-                    .input('accountDescription', sql.NVarChar(), this.accountDescription)   
-                    .query(`
+          const pool = await sql.connect(con);
+          tmpResult = await pool
+            .request()
+            .input("accountId", sql.Int(), this.accountId)
+            .input("roleId", sql.Int(), this.role.roleId)
+            .input(
+              "accountDescription",
+              sql.NVarChar(),
+              this.accountDescription
+            ).query(`
                     UPDATE stuorgAccount
                     SET FK_roleId = @roleId, accountDescription = @accountDescription
                     WHERE accountId = @accountId
-                `)  
+                `);
 
-               console.log("tmpResult");
+          console.log("tmpResult");
 
-                sql.close();   
+          sql.close();
 
-                const account = await Account.findAccountById(this.accountId); 
+          const account = await Account.findAccountById(this.accountId);
 
-                resolve(account);  
+          resolve(account);
+        } catch (err) {
+          reject(err);
+        }
 
-            } catch (err) {
-                reject(err);   
-            } 
-
-            sql.close();    
-        })();   
-    })
-}
-
+        sql.close();
+      })();
+    });
+  }
 }
 
 module.exports = Account;

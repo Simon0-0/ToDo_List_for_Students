@@ -45,7 +45,7 @@ class Member {
           if (resultExistsCheck.recordset.length == 1)
             throw {
               statusCode: 401,
-              errorMessage: `user already exists in the database`,
+              errorMessage: `user already exists in the group`,
               errorObj: {},
             };
           if (resultExistsCheck.recordset.length > 1)
