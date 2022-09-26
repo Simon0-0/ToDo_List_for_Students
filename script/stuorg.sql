@@ -304,4 +304,8 @@ GO
 -- ON a.accountId= p.FK_accountId
 -- WHERE u.userId = 8
 
+SELECT * 
+FROM StuorgTask
+
+
 
