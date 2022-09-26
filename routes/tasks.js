@@ -89,4 +89,19 @@ router.get("/", [authenticate, adminAuth], async (req, res) => {
     }
   });
 
+   //DELETE /api/tasks/ - delete a task
+   router.delete("/:taskId", [authenticate], async (req, res) => {
+    try {
+      const task = await Task.deleteTask(req.account.userId, req.params.taskId);
+      console.log('called function')
+      return res.send(JSON.stringify(task));
+    } catch (err) {
+      if (err.statusCode) {
+        return res.status(err.statusCode).send(JSON.stringify(err));
+      }
+      return res.status(500).send(JSON.stringify(err));
+    }
+  });
+  
+
 module.exports = router;

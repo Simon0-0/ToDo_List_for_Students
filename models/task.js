@@ -58,99 +58,6 @@ class Task {
     return schema.validate(taskObj);
   }
 
-  //   //read by taskId
-  //   static readById(taskId) {
-  //     return new Promise((resolve, reject) => {   
-  //         (async () => {  
-  //             try {
-  //                 // open connection to DB
-  //                 const pool = await sql.connect(con);
-
-  //                 // query DB (SELECT all columns FROM author table WHERE authorid)
-  //                 const result = await pool.request()
-  //                     .input('taskId', sql.Int(), taskId)
-  //                     .query(`
-  //                         SELECT *
-  //                         FROM stuorgTask st
-  //                         WHERE st.sturgTask = @taskId
-  //                     `)
-
-  //                 // check if exactly one result: authorid is primary key in the stuorgTask table, we expect to see exactly one result
-  //                 if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: `Corrupt DB, mulitple tasks with taskId: ${taskId}`, errorObj: {} };
-  //                 if (result.recordset.length == 0) throw { statusCode: 404, errorMessage: `task not found by taskId: ${taskId}`, errorObj: {} };
-
-  //                  // restructure taskWannabe
-  //                  const taskWannabe = {
-  //                   taskId: result.recordset[0].taskId,
-  //                   labelId: result.recordset[0].labelId,
-  //                   userId: result.recordset[0].userId,
-  //                   taskdueDate: result.recordset[0].taskdueDate,
-  //                   tasksubject: result.recordset[0].tasksubject
-  //               }
-
-  //                 // valdiate taskWannabe
-  //                 const { error } = Task.validate(taskWannabe);
-  //                 if (error) throw { statusCode: 500, errorMessage: `Corrupt DB, task does not validate: ${taskWannabe.taskId}`, errorObj: error };
-
-  //                 // resolve with author
-  //                 resolve(new Task(taskWannabe));
-
-  //             } catch (err) {
-  //                 reject(err) // reject with error
-  //             }
-
-  //             sql.close();    // CLOSE DB CONNECTION
-
-  //         })();   // *** IIFE
-  //     })
-  // }
-  //   //read task by subject
-  //   static readBySubject(tasksubject) {
-  //     return new Promise((resolve, reject) => {   
-  //         (async () => {  
-  //             try {
-  //                 // open connection to DB
-  //                 const pool = await sql.connect(con);
-
-  //                 // query DB (SELECT all columns FROM author table WHERE authorid)
-  //                 const result = await pool.request()
-  //                     .input('tasksubject', sql.NVarChar(), tasksubject)
-  //                     .query(`
-  //                         SELECT *
-  //                         FROM stuorgTask st
-  //                         WHERE st.tasksubject = @tasksubject
-  //                     `)
-
-  //                 // check if exactly one result
-  //                 if (result.recordset.length > 1) throw { statusCode: 500, errorMessage: `Corrupt DB, mulitple tasks with subject: ${tasksubject}`, errorObj: {} };
-  //                 if (result.recordset.length == 0) throw { statusCode: 404, errorMessage: `task not found by subject: ${tasksubject}`, errorObj: {} };
-
-  //                 // restructure taskWannabe
-  //                 const taskWannabe = {
-  //                     taskId: result.recordset[0].taskId,
-  //                     labelId: result.recordset[0].labelId,
-  //                     userId: result.recordset[0].userId,
-  //                     taskdueDate: result.recordset[0].taskdueDate,
-  //                     tasksubject: result.recordset[0].tasksubject
-  //                 }
-
-  //                 // valdiate taskWannabe
-  //                 const { error } = Task.validate(taskWannabe);
-  //                 if (error) throw { statusCode: 500, errorMessage: `Corrupt DB, task does not validate: ${taskWannabe.taskId}`, errorObj: error };
-
-  //                 // resolve with author
-  //                 resolve(new Task(taskWannabe))
-
-  //             } catch (err) {
-  //                 reject(err) // reject with error
-  //             }
-
-  //             sql.close();    // CLOSE DB CONNECTION
-
-  //         })();   // *** IIFE
-  //     })
-  // }
-
   //create a new task
   static createTask(userId, labelId, taskdueDate, tasksubject) {
     return new Promise((resolve, reject) => {
@@ -343,6 +250,55 @@ class Task {
 
           console.log(taskArray);
           resolve(taskArray);
+        } catch (err) {
+          console.log("we are at the error");
+          reject(err);
+        }
+        sql.close();
+      })();
+    });
+  }
+
+  static deleteTask(userId, taskId) {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const pool = await sql.connect(con);
+          console.log("opened connection to the DB");
+          const result = await pool
+            .request()
+            .input("userId", sql.Int(), userId)
+            .input("taskId", sql.Int(), taskId).query(`
+            SELECT *
+            FROM stuorgTask
+            WHERE taskId = @taskId
+            AND FK_userId = @userId
+
+            DELETE 
+            FROM stuorgGroupTask
+            WHERE FK_taskId = @taskId
+
+            DELETE 
+            FROM stuorgTask
+            WHERE taskId = @taskId
+            AND FK_userId = @userId
+            `);
+
+          console.log("send query");
+
+          if (result.recordset.length != 1)
+            throw {
+              statusCode: 500,
+              errorMessage: `corrupted data in the DB`,
+              errorObj: {},
+            };
+
+          console.log("result is 1");
+
+          const task = result.recordset[0];
+          console.log(task);
+          this.validate(task);
+          resolve(task);
         } catch (err) {
           console.log("we are at the error");
           reject(err);
