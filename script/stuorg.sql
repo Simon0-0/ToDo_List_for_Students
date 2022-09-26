@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 USE [WAD-MMD-CSD-S21_10407746]
 GO
 
@@ -144,9 +144,9 @@ CREATE TABLE stuorgGroup
 --GROUP TASK
 CREATE TABLE stuorgGroupTask
 (
-    FK_taskId INT UNIQUE,
-    FK_groupId INT UNIQUE,
-    FK_userId INT UNIQUE,
+    FK_taskId INT,
+    FK_groupId INT,
+    FK_userId INT,
 
 
     CONSTRAINT stuorgFK_GroupTask_User FOREIGN KEY (FK_userId) REFERENCES stuorgUser (userId),
@@ -250,11 +250,113 @@ VALUES
     ('assigment', 'a task without specfic constrains')
 GO
 
--- INSERT INTO stuorgTask
---     ( [FK_labelId], [FK_userId], [taskdueDate], [tasksubject])
--- VALUES
---     (1, 1, , 'definet'),
--- GO
+INSERT INTO stuorgTask
+    ([FK_labelId], [FK_userId], [taskdueDate], [tasksubject])
+VALUES
+    (1, 1, 1665532800000, ' Read about SQL'),
+    (2, 1, 1664755200000, 'Install modules'),
+    (3, 1, 1646870400000, 'Rubric: NASA'),
+    (1, 3, 1665532800000, 'Read about SQL'),
+    (2, 3, 1649548800000, 'Install modules'),
+    (3, 3, 1665100800000, 'Write essay on Poland'),
+    (1, 2, 1665100800000, 'Read about Personas'),
+    (2, 2, 1652140800000, 'setup GET endpoint'),
+    (3, 2, 1664755200000,'Rubric: Contactlist'),
+    (1, 4, 1652140800000, 'Read about colorwheel'),
+    (2, 4, 1665100800000, 'Photoshoot with client'),
+    (3, 4, 1664496000000, 'Create video about cold war'),
+    (1, 5, 1663113600000, 'Read about design psychology'),
+    (2, 5, 1665619200000, 'Poster about Node.js'),
+    (3, 5, 1666656000000,'Create video about cold war'),
+    (1, 6, 1664668800000, 'draw plant cell'),
+    (2, 6, 1667260800000, 'crochet a cow'),
+    (3, 6, 1668470400000, 'write a play'),
+    (1, 7, 1664755200000, 'page 16 in the textbook'),
+    (2, 7, 1665619200000, 'Read division 303'),
+    (3, 7, 1667260800000, 'Recreate "sunflowers" by van Gogh'),
+    (1, 8, 1665100800000, 'make a eye color punnett square'),
+    (2, 8, 1664668800000, 'make a model of a chosen building'),
+    (3, 8, 1664755200000, 'read about CRUD'),
+    (1, 9, 1665619200000, 'Write essay on Poland'),
+    (2, 9, 1668470400000, 'Photoshoot with client'),
+    (3, 9, 1664496000000, 'Read about design psychology'),
+    (1, 10, 1668988800000, 'Rubric: NASA'),
+    (2, 10, 1666656000000, 'photoshop a picture with a dog'),
+    (3, 10, 1668470400000, 'walk the ferrets'),
+    (1, 11, 1667260800000, 'Read about different tax brackets'),
+    (2, 11, 1664668800000, 'Reanact the death scene from Romeo & Juliet'),
+    (3, 11, 1668988800000, 'make a model of a chosen building'),
+    (1, 12, 1663113600000, 'Create video about cold war'),
+    (2, 12, 1666656000000, 'write a play'),
+    (3, 12, 1665619200000, 'Read division 303'),
+    (1, 13, 1668470400000, 'walk the ferrets'),
+    (2, 13, 1664668800000, 'Photoshoot with client'),
+    (3, 13, 1665100800000, 'Rewrite dracula'),
+    (1, 14, 1663113600000, 'Analise "Peppa the pig"'),
+    (2, 14, 1667260800000, 'Create video about cold war'),
+    (3, 14, 1664496000000, 'read about CRUD')
+GO
+
+INSERT INTO stuorgGroup
+    ([FK_userId], [groupName], [groupDescription])
+VALUES
+    (1, 'random people group', 'just a group full of random people'),
+    (3, 'crptid 101', 'Criptids only'),
+    (9, 'sales department', 'official sales department group'),
+    (11, 'Yorozuya', 'Read about SQL'),
+    (2, 'Potato lovers', 'The official potato fandom'),
+    (5, 'business partners', 'business affiliate individuals'),
+    (7, 'the squad', 'super secret squad')
+GO
+
+INSERT INTO stuorgUserGroup
+    ([FK_groupId], [FK_userId])
+VALUES
+    (1, 3),
+    (1, 5),
+    (1, 7),
+    (1, 9),
+    (1, 11),
+    (1, 13),
+    (2, 4),
+    (2, 5),
+    (2, 6),
+    (3, 8),
+    (3, 10),
+    (4, 11),
+    (4, 12),
+    (4, 13),
+    (4, 14),
+    (5, 1),
+    (5, 12),
+    (5, 6),
+    (5, 3),
+    (5, 7),
+    (6, 2),
+    (5, 9),
+    (5, 11),
+    (6, 1),
+    (6, 2),
+    (6, 4),
+    (6, 10),
+    (6, 11),
+    (6, 13),
+    (6, 8),
+    (6, 9)
+GO
+
+INSERT INTO stuorgGroupTask
+    ([FK_taskId], [FK_groupId], [FK_userId])
+VALUES
+    (5, 1, 3),
+    (8, 2, 5),
+    (5, 3, 10),
+    (11, 4, 14),
+    (14, 5, 7),
+    (17, 6, 2),
+    (20, 7, 8)
+GO
+
 
 
 
@@ -300,7 +402,4 @@ FROM stuorgUser u
     ON a.accountId= p.FK_accountId
 WHERE u.userId = 8
 
-
-=======
->>>>>>> Stashed changes
 
