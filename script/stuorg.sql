@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 USE [WAD-MMD-CSD-S21_10407746]
 GO
 
@@ -300,4 +301,6 @@ FROM stuorgUser u
 WHERE u.userId = 8
 
 
+=======
+>>>>>>> Stashed changes
 
