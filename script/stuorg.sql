@@ -1,4 +1,5 @@
-USE [WAD-MMD-CSD-S21_10407748]
+
+USE [WAD-MMD-CSD-S21_10407746]
 GO
 
 ALTER TABLE stuorgUserGroup
@@ -76,6 +77,7 @@ CREATE TABLE stuorgTaskLabel
 (
     labelId INT NOT NULL IDENTITY PRIMARY KEY,
     -- Primary key: labelid
+    labelName NVARCHAR (50) NOT NULL,
     labelDescription NVARCHAR (255) NOT NULL
 );
 
@@ -119,10 +121,10 @@ CREATE TABLE stuorgPassword
 CREATE TABLE stuorgTask
 (
     taskId INT NOT NULL IDENTITY PRIMARY KEY,
-    FK_labelId INT UNIQUE,
-    FK_userId INT UNIQUE,
-    taskdueDate INT,
-    tasksubject NVARCHAR(50),
+    FK_labelId INT,
+    FK_userId INT,
+    taskdueDate BIGINT,
+    tasksubject NVARCHAR(255),
 
     CONSTRAINT stuorgFK_task_label FOREIGN KEY (FK_labelId) REFERENCES stuorgTaskLabel (labelId),
 
@@ -155,7 +157,7 @@ CREATE TABLE stuorgGroupTask
     CONSTRAINT stuorgFK_GroupTask_Task FOREIGN KEY (FK_taskId) REFERENCES stuorgTask (taskId)
 );
 
--- STUORGUSERGROUP
+--STUORGUSERGROUP
 
 CREATE TABLE stuorgUserGroup
 (
@@ -182,7 +184,6 @@ INSERT INTO stuorgRole
 VALUES
     ('admin', 'Can freely delate any account or group'),
     ('user', 'can freely edit own account and groups')
-
 GO
 
 INSERT INTO stuorgAccount
@@ -195,6 +196,48 @@ VALUES
     ('Kowalski', 'Kowalski analisys', 5, 1)
 GO
 
+-- -- -- john password: lookingFor_love
+-- -- -- hash $2a$12$ULJSl3SbvbuAvhkenWPDk.Mo.Pgc/XxrvPnsuy2XmCOoHXpMGgsw.
+
+-- -- -- alice pasword: aliceLovesPotatoes
+-- -- -- hash $2a$12$E5.f.BTcTNSJO9q5RextN.zHo/cVZF05GB8JfLDKn2OAeAWeJQuGe
+
+-- -- -- mothman password: theBRIDGEEEEEEEEEEE
+-- -- -- hash $2a$12$1g/I0l6EDy77tlnsRhbJOuTOF5ieUT2.67sSKzB7TAV0G3FdN4dLm
+
+-- -- -- lochNessMonster password: girlBO$$
+-- -- -- hash $2a$12$v472RLlX39Hb.9KhdCAcVuASCWFca6Jfs6PQTeMAUt9zZZUq7oQN.
+
+-- -- -- kowalski password: theCold_voidOFtheuniverse
+-- -- -- hash $2a$12$kw9QbR8BK7VKiZwJTm.HeORgoTnDdC16E95A/h7N4t8b4HKRynIHq
+
+INSERT INTO stuorgTaskLabel
+    ([labelName], [labelDescription])
+VALUES
+    ('Homework', 'Tasks to do for day-to-day classes.'),
+    ('Project', 'Tasks to do for a project.'),
+    ('Assignment', 'Tasks to do for an assignment.')
+GO
+
+INSERT INTO stuorgTask
+    ([FK_labelId], [FK_userId], [tasksubject])
+VALUES
+    (1, 1, 'Read about SQL'),
+    (2, 1, 'Install modules'),
+    (3, 1, 'Rubric: NASA'),
+    (1, 3, 'Read about SQL'),
+    (2, 3, 'Install modules'),
+    (3, 3, 'Write essay on Poland'),
+    (1, 2, 'Read about Personas'),
+    (2, 2, 'setup GET endpoint'),
+    (3, 2, 'Rubric: Contactlist'),
+    (1, 4, 'Read about colorwheel'),
+    (2, 4, 'Photoshoot with client'),
+    (3, 4, 'Create video about cold war'),
+    (1, 5, 'Read about design psychology'),
+    (2, 5, 'Poster about Node.js'),
+    (3, 5, 'Create video about cold war')
+GO
 
 
 -- john password: lookingFor_love
@@ -241,17 +284,27 @@ FROM stuorgUser u
     ON a.FK_roleId = r.roleId
 WHERE u.email = 'heJustTryingToWarnYou@email.com'
 
--- SELECT *
--- FROM stuorgGroup 
+
+SELECT *
+FROM stuorgTask
+GO
+
+
+
+SELECT *
+FROM stuorgGroup
 
 
 SELECT *
 FROM stuorgAccount
 
 
--- DELETE 
--- FROM stuorgAccount
--- WHERE FK_userId = 6
+SELECT *
+FROM stuorgUser
 
--- SELECT *
--- FROM stuorgUser
+
+SELECT *
+FROM stuorgUser
+
+
+

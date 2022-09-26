@@ -1,7 +1,6 @@
 //require modules
 const config = require('config');
-const jwt = require('jsonwebtoken');//do we need to install this?c
-
+const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
     try {
     //check if there is a token in the header

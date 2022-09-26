@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+
 const Account = require("../models/account");
 
 const _ = require('lodash');
@@ -285,6 +286,7 @@ router.put('/:accountId', [auth, admin, check], async (req, res) => {
 
 // DELETE /api/accounts/:accountid
 router.delete("/:accountid", [auth], async (req, res) => {
+
   try {
     const deleteAccount = await Account.deleteAccount(
       req.account.accountId,

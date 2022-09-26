@@ -4,6 +4,7 @@ const con = config.get("dbConfig_UCN");
 const sql = require("mssql");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
+const { resolve } = require("path");
 
 
 //DO WE NEED TO HAVE THE ROLEID AS A FOREIGN KEY IN OUR ACCOUNT MODEL(entity)?
@@ -50,16 +51,14 @@ class Account {
     return schema.validate(accountObj);
   }
 
+
+  
   static validateCredentials(credentialsObj) {
     const schema = Joi.object({
-      email: Joi.string()
-                .email()
-                .required(),
-            password: Joi.string()
-                .min(3)
-                .required()
-    })
-    console.log("credentialsObj");
+      email: Joi.string().email().max(255).required(),
+      password: Joi.string().min(3).required(),
+    });
+    console.log(credentialsObj);
     return schema.validate(credentialsObj);
   }
 
@@ -114,7 +113,6 @@ class Account {
     });
   }
 
- 
   static findAccountByUser(email) {
     return new Promise((resolve, reject) => {
       (async () => {
@@ -152,7 +150,9 @@ class Account {
           if ((result.recordset.length = 1)) {
             console.log(`one result found`);
           }
+
           console.log(" before accountWanbe");
+
           const accountWanbe = {
             accountId: result.recordset[0].accountId,
             userId: result.recordset[0].userId,
@@ -190,6 +190,7 @@ class Account {
       })();
     });
   }
+
 
   static findAccountById(accountId) {
     return new Promise((resolve, reject) => {
@@ -285,6 +286,7 @@ class Account {
     })
 
   }
+
 
   static changeDisplayName(displayName, accountId, email) {
     return new Promise((resolve, reject) => {
@@ -564,6 +566,7 @@ class Account {
     });
   }
 
+
   update() {
     return new Promise((resolve, reject) => {  
         (async () => {  
@@ -598,6 +601,7 @@ class Account {
         })();   
     })
 }
+
 }
 
-module.exports = Account; //in the end, export this to Account
+module.exports = Account;

@@ -6,6 +6,19 @@ const authenticate = require("../middleware/authenticate");
 const router = require("./members");
 const User = require("../models/user");
 
+router.get('/email/:email', async (req, res)=>{
+  try {
+    console.log('started get userbyemail')
+    const user = await User.getUserByEmail(req.params.email);
+    return res.send(JSON.stringify(user));
+  } catch (err) {
+    if (err.statusCode)
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    return res.status(500).send(JSON.stringify(err));
+  }
+})
+
+
 router.post("/", async (req, res) => {
   try {
     const payloadValidation = Joi.object({
