@@ -214,9 +214,7 @@ GO
 -- INSERT INTO stuorgTaskLabel
 --     ([labelName], [labelDescription])
 -- VALUES
---     ('Homework', 'Tasks to do for day-to-day classes.'),
---     ('Project', 'Tasks to do for a project.'),
---     ('Assignment', 'Tasks to do for an assignment.')
+--     ('Finished', 'Tasks that are completed.')
 -- GO
 
 -- INSERT INTO stuorgTask
@@ -304,8 +302,8 @@ GO
 -- ON a.accountId= p.FK_accountId
 -- WHERE u.userId = 8
 
-SELECT * 
-FROM StuorgTask
+-- SELECT * 
+-- FROM StuorgTaskLabel
 
 
 
