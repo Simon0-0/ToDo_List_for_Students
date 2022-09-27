@@ -85,6 +85,7 @@ class Member {
               errorObj: {},
             };
 
+
           const member = result.recordset[0];
           this.validate(member);
           resolve(member);
@@ -113,6 +114,7 @@ class Member {
                 WHERE FK_groupId = @groupId
                 `);
 
+
           if (result.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -133,7 +135,6 @@ class Member {
           result.recordset.forEach((member) => {
             if (member.userId != member.FK_userId) {
               userSchema.validate(member);
-              console.log("validated member");
               const memberObj = {
                 userName: member.userName,
                 email: member.email,
@@ -142,7 +143,6 @@ class Member {
             }
           });
 
-          console.log(membersArray);
           const responseObj = {
             groupName: result.recordset[0].groupName,
             groupId: result.recordset[0].groupId,
@@ -156,6 +156,7 @@ class Member {
           });
 
           responseobjSchema.validate(responseObj);
+
 
           resolve(responseObj);
         } catch (err) {
@@ -187,6 +188,7 @@ class Member {
           WHERE FK_groupId = @groupId
           AND FK_userId = @userId
           `);
+
 
           if (result.recordset.length == 0)
             throw {
@@ -227,6 +229,7 @@ class Member {
           AND ug.FK_userId = @userId
           `);
 
+
           if (Adminresult.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -248,6 +251,7 @@ class Member {
           WHERE email = @email
           `);
 
+
           if (emailResult.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -261,7 +265,6 @@ class Member {
               errorObj: {},
             };
 
-          const delUserId = emailResult.recordset[0].userId;
 
           if (Adminresult.recordset[0].FK_userId == delUserId)
             throw {
@@ -287,6 +290,7 @@ class Member {
           WHERE FK_groupId = @groupId
           AND FK_userId = @userId
           `);
+
 
           if (result.recordset.length == 0)
             throw {

@@ -16,7 +16,6 @@ const Joi = require("joi");
 router.get("/", [authenticate, adminAuth], async (req, res) => {
   try {
     const tasks = await Task.getAllTasks();
-    console.log("called function");
     return res.send(JSON.stringify(tasks));
   } catch (err) {
     if (err.statusCode) {
@@ -46,7 +45,6 @@ router.get("/own/:labelId", [authenticate], async (req, res) => {
 router.get("/own", [authenticate], async (req, res) => {
   try {
     const tasks = await Task.getOwnTasks(req.account.userId);
-    console.log(req.account.userId);
     return res.send(JSON.stringify(tasks));
   } catch (err) {
     if (err.statusCode) {
@@ -92,10 +90,7 @@ router.post("/", [authenticate], async (req, res) => {
 
 router.put("/completed/:taskId", [authenticate], async (req, res) => {
   try {
-    console.log("started try and catch");
     const task = await Task.finishTask(req.params.taskId);
-    console.log(task);
-    console.log("no error so far in put task");
     return res.send(JSON.stringify(task));
   } catch (err) {
     if (err.statusCode) {
@@ -109,7 +104,6 @@ router.put("/completed/:taskId", [authenticate], async (req, res) => {
 router.delete("/:taskId", [authenticate], async (req, res) => {
   try {
     const task = await Task.deleteTask(req.account.userId, req.params.taskId);
-    console.log("called function");
     return res.send(JSON.stringify(task));
   } catch (err) {
     if (err.statusCode) {

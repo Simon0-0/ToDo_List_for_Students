@@ -49,9 +49,9 @@ class Task {
   static createTask(userId, labelId, taskdueDate, tasksubject) {
     return new Promise((resolve, reject) => {
       (async () => {
+
         try {
           const pool = await sql.connect(con);
-          console.log("connected to the database");
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)
@@ -153,7 +153,6 @@ class Task {
 
           resolve(taskArray);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -261,6 +260,7 @@ class Task {
               errorMessage: `corrupted data in the DB`,
               errorObj: {},
             };
+
 
           const task = result.recordset[0];
           this.validate(task);

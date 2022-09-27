@@ -8,7 +8,6 @@ const User = require("../models/user");
 
 router.get('/email/:email', async (req, res)=>{
   try {
-    console.log('started get userbyemail')
     const user = await User.getUserByEmail(req.params.email);
     return res.send(JSON.stringify(user));
   } catch (err) {
