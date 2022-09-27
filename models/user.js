@@ -21,13 +21,11 @@ class User {
       userName: Joi.string().max(255).required(),
       email: Joi.string().max(50).required(),
     });
-    console.log("validationSchema");
     return schema;
   }
 
   static validate(userObj) {
     const schema = User.validationSchema();
-    console.log(`went through validate(accountObj)`);
     return schema.validate(userObj);
   }
 

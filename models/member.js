@@ -17,13 +17,11 @@ class Member {
       groupId: Joi.number().integer().min(1),
       userId: Joi.number().integer().min(1),
     });
-    console.log("validationSchema");
     return schema;
   }
 
   static validate(memberObj) {
     const schema = Member.validationSchema();
-    console.log(`went through validate(memberObj)`);
     return schema.validate(memberObj);
   }
 
@@ -73,17 +71,12 @@ class Member {
             AND ug.FK_groupId = @groupId       
             `);
 
-          console.log("sent query");
-          console.log(result);
-
           if (result.recordset.length == 0)
             throw {
               statusCode: 500,
               errorMessage: `insert failed`,
               errorObj: {},
             };
-
-          console.log("result is not 0");
 
           if (result.recordset.length > 1)
             throw {
@@ -92,15 +85,10 @@ class Member {
               errorObj: {},
             };
 
-          console.log("result is 1");
-
           const member = result.recordset[0];
-          console.log(member);
           this.validate(member);
-          console.log(JSON.stringify(member));
           resolve(member);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -124,8 +112,6 @@ class Member {
                 ON ug.FK_groupId = g.groupId
                 WHERE FK_groupId = @groupId
                 `);
-
-          console.log(result);
 
           if (result.recordset.length == 0)
             throw {
@@ -163,7 +149,6 @@ class Member {
             groupMembers: membersArray,
           };
 
-
           const responseobjSchema = Joi.object({
             groupName: Joi.string(),
             groupId: Joi.number().integer().min(1),
@@ -172,11 +157,8 @@ class Member {
 
           responseobjSchema.validate(responseObj);
 
-          console.log("validated res obj");
-
           resolve(responseObj);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -188,8 +170,6 @@ class Member {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          console.log("started delete");
-          console.log(userId);
           const pool = await sql.connect(con);
           const result = await pool
             .request()
@@ -207,8 +187,6 @@ class Member {
           WHERE FK_groupId = @groupId
           AND FK_userId = @userId
           `);
-
-          console.log(result);
 
           if (result.recordset.length == 0)
             throw {
@@ -236,8 +214,6 @@ class Member {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          console.log("started delete");
-          console.log(userId);
           const pool = await sql.connect(con);
           const Adminresult = await pool
             .request()
@@ -250,8 +226,6 @@ class Member {
           WHERE ug.FK_groupId = @groupId
           AND ug.FK_userId = @userId
           `);
-
-          console.log(Adminresult);
 
           if (Adminresult.recordset.length == 0)
             throw {
@@ -266,18 +240,13 @@ class Member {
               errorObj: {},
             };
 
-        
-
           const emailResult = await pool
             .request()
-            .input("email", sql.NVarChar(), email)
-            .query(`
+            .input("email", sql.NVarChar(), email).query(`
           SELECT userId
           FROM stuorgUser
           WHERE email = @email
           `);
-
-          console.log(emailResult);
 
           if (emailResult.recordset.length == 0)
             throw {
@@ -292,10 +261,9 @@ class Member {
               errorObj: {},
             };
 
-            const delUserId = emailResult.recordset[0].userId
-            console.log(delUserId)
+          const delUserId = emailResult.recordset[0].userId;
 
-            if (Adminresult.recordset[0].FK_userId == delUserId)
+          if (Adminresult.recordset[0].FK_userId == delUserId)
             throw {
               statusCode: 500,
               errorMessage: `cannot remove admin`,
@@ -306,8 +274,7 @@ class Member {
             .request()
             .input("email", sql.NVarChar(), email)
             .input("groupId", sql.Int(), groupId)
-            .input("userId", sql.Int(), delUserId)
-            .query(`
+            .input("userId", sql.Int(), delUserId).query(`
           SELECT g.groupName, ug.FK_userId
           FROM stuorgUserGroup ug
           JOIN stuorgGroup g
@@ -320,8 +287,6 @@ class Member {
           WHERE FK_groupId = @groupId
           AND FK_userId = @userId
           `);
-
-          console.log(result);
 
           if (result.recordset.length == 0)
             throw {
@@ -346,12 +311,9 @@ class Member {
     });
   }
 
-
   static getAllMemberships(userId) {
     return new Promise((resolve, reject) => {
       (async () => {
-        console.log("started try and catch");
-
         try {
           const pool = await sql.connect(con);
           const result = await pool.request().input("userId", sql.Int(), userId)
@@ -364,7 +326,6 @@ class Member {
       ON g.FK_userId = u.userId
       WHERE ug.FK_userId = @userId
       `);
-          console.log("send query");
 
           if (result.recordset.length == 0)
             throw {
@@ -372,15 +333,12 @@ class Member {
               errorMessage: `no group found for this userId: ${userId}`,
               errorObj: {},
             };
-          console.log("array lenght > 0");
 
           let membership = [];
           result.recordset.forEach((group) => {
             this.validate(group);
             membership.push(group);
           });
-
-          console.log("pushed into array");
 
           resolve(membership);
         } catch (err) {
