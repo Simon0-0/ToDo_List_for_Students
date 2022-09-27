@@ -24,13 +24,11 @@ class Group {
       groupName: Joi.string().max(255),
       groupDescription: Joi.string().max(255),
     });
-    console.log("validationSchema");
     return schema;
   }
 
   static validate(groupObj) {
     const schema = Group.validationSchema();
-    console.log(`went through validate(groupObj)`);
     return schema.validate(groupObj);
   }
 
@@ -39,7 +37,6 @@ class Group {
       groupName: Joi.string().max(255).required(),
       groupDescription: Joi.string().max(255).required(),
     });
-    console.log(inputObj);
     return schema.validate(inputObj);
   }
 
@@ -49,7 +46,6 @@ class Group {
         console.log("started 1 try block on create group");
         try {
           const pool = await sql.connect(con);
-          console.log("connected to the database");
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)

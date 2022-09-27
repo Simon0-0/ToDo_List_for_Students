@@ -6,7 +6,6 @@ const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const { resolve } = require("path");
 
-//DO WE NEED TO HAVE THE ROLEID AS A FOREIGN KEY IN OUR ACCOUNT MODEL(entity)?
 class Account {
   constructor(accountObj) {
     if (accountObj.accountId) {
@@ -26,7 +25,6 @@ class Account {
     }
   }
 
-  //creating our validation for our account object
   static validationSchema() {
     const schema = Joi.object({
       accountId: Joi.number().integer().min(1),
@@ -39,14 +37,11 @@ class Account {
         roleType: Joi.string().max(20),
       }),
     });
-    console.log("validationSchema");
     return schema;
   }
 
-  //validating our validation schema
   static validate(accountObj) {
     const schema = Account.validationSchema();
-    console.log(`went through validate(accountObj)`);
     return schema.validate(accountObj);
   }
 
@@ -55,20 +50,16 @@ class Account {
       email: Joi.string().email().max(255).required(),
       password: Joi.string().min(3).required(),
     });
-    console.log(credentialsObj);
     return schema.validate(credentialsObj);
   }
 
   static checkCred(credObj) {
     return new Promise((resolve, reject) => {
       (async () => {
-        //find the account
         console.log("we are here");
         try {
           console.log("started try and catch bloc");
-
           const account = await Account.findAccountByUser(credObj.email);
-          console.log("account found");
           const pool = await sql.connect(con);
           const result = await pool
             .request()
@@ -78,24 +69,15 @@ class Account {
             FROM stuorgPassword p
             WHERE p.FK_accountId = @accountId`
             );
-          console.log("query send");
           if (result.recordset.length != 1)
             throw { statusCode: 500, errorMessage: `Corrupt DB`, errorObj: {} };
-
-          console.log("result recevied");
-
           const hashedPas = result.recordset[0].hashedPassword;
-          console.log(`result recordset ${result.recordset[0]}`);
-          console.log(credObj.password);
-
           const okCred = bcrypt.compareSync(credObj.password, hashedPas);
 
-          console.log(`account password found ${credObj.password}`);
           if (!okCred)
             throw {
               statusCode: 401,
             };
-          console.log("resolving account");
           resolve(account);
         } catch (err) {
           reject({
@@ -130,8 +112,6 @@ class Account {
               `
             );
 
-          console.log("send the query to the datebase");
-
           if (result.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -148,8 +128,6 @@ class Account {
             console.log(`one result found`);
           }
 
-          console.log(" before accountWanbe");
-
           const accountWanbe = {
             accountId: result.recordset[0].accountId,
             userId: result.recordset[0].userId,
@@ -162,10 +140,7 @@ class Account {
             },
           };
 
-          console.log(accountWanbe);
-
           const { error } = Account.validate(accountWanbe);
-          console.log("account validated in readByUser function");
 
           if (error)
             throw {
@@ -174,13 +149,8 @@ class Account {
               errorObj: error,
             };
 
-          console.log("started resolve");
-
           resolve(new Account(accountWanbe));
-          console.log("resolved with account");
         } catch (err) {
-          console.log("we are getting rejected with an error");
-          console.log(err);
           reject(err);
         }
         sql.close();
@@ -254,15 +224,12 @@ class Account {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          console.log("GET all groups");
-
           const pool = await sql.connect(con);
           const response = await pool.request().query(`
             SELECT *
             FROM stuorgAccount
           `);
 
-          console.log("send SELECT query to the DB");
           if (response.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -270,21 +237,15 @@ class Account {
               errorObj: {},
             };
 
-          console.log("there is at least 1 account here");
-
           let accountArray = [];
-          console.log("created array");
 
           response.recordset.forEach((account) => {
             this.validate(account);
-            console.log("validation the account");
             accountArray.push(account);
           });
 
-          console.log(accountArray);
           resolve(accountArray);
         } catch (err) {
-          console.log("error after readAll");
           reject(err);
         }
 
@@ -296,10 +257,8 @@ class Account {
   static changeDisplayName(userId, displayName) {
     return new Promise((resolve, reject) => {
       (async () => {
-        console.log("started try block on changeDisplayName");
         try {
           const pool = await sql.connect(con);
-          console.log("opened pool conection");
           const result = await pool
             .request()
             .input("displayName", sql.NVarChar(), displayName)
@@ -318,7 +277,6 @@ class Account {
               WHERE u.userId = @userId
               `
             );
-          console.log("send the query to the datebase");
 
           if (result.recordset.length == 0)
             throw {
@@ -348,8 +306,6 @@ class Account {
             },
           };
 
-          console.log(accountWanbe);
-
           const { error } = Account.validate(accountWanbe);
           console.log("account validated in readByUser function");
 
@@ -360,13 +316,8 @@ class Account {
               errorObj: error,
             };
 
-          console.log("started resolve");
-
           resolve(new Account(accountWanbe));
-          console.log("resolved with account");
         } catch (err) {
-          console.log("we are getting rejected with an error");
-          console.log(err);
           reject(err);
         }
         sql.close();
@@ -376,10 +327,8 @@ class Account {
   static changeAccountDescription(userId, accountDescription) {
     return new Promise((resolve, reject) => {
       (async () => {
-        console.log("started try block on changeAccountDescription");
         try {
           const pool = await sql.connect(con);
-          console.log("opened pool conection");
           const result = await pool
             .request()
             .input("accountDescription", sql.NVarChar(), accountDescription)
@@ -399,8 +348,6 @@ class Account {
               `
             );
 
-          console.log("send the query to the datebase");
-
           if (result.recordset.length == 0)
             throw {
               statusCode: 404,
@@ -429,10 +376,7 @@ class Account {
             },
           };
 
-          console.log(accountWanbe);
-
           const { error } = Account.validate(accountWanbe);
-          console.log("account validated in readByUser function");
 
           if (error)
             throw {
@@ -441,13 +385,9 @@ class Account {
               errorObj: error,
             };
 
-          console.log("started resolve");
-
           resolve(new Account(accountWanbe));
           console.log("resolved with account");
         } catch (err) {
-          console.log("we are getting rejected with an error");
-          console.log(err);
           reject(err);
         }
         sql.close();
@@ -459,10 +399,7 @@ class Account {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          console.log("started first try box");
-
           const findAccountToDelete = await Account.findAccountByUser(email);
-          console.log("called findAccountByUser");
 
           if (findAccountToDelete.recordset.length == 0)
             throw {
@@ -471,26 +408,19 @@ class Account {
               errorObj: {},
             };
 
-          console.log("recordset not 0");
-
           if (findAccountToDelete.recordset.length > 1)
             throw {
               statusCode: 500,
               errorMessage: `Corrupt data in DB`,
               errorObj: {},
             };
-          console.log("recordset not > 1");
 
           resolve(findAccountToDelete.recordset[0]);
-          console.log("resolved with account object");
         } catch (err) {
           reject(err);
         }
         try {
-          console.log("started second try box");
-
           const pool = await sql.connect(con);
-          console.log("create query");
 
           const response = await pool
             .request()
@@ -531,12 +461,8 @@ class Account {
           WHERE u.userId = @userId
           `);
 
-          console.log("send a query");
-
           resolve(response.recordset[0]);
-          console.log("resolve with empty object");
         } catch (err) {
-          console.log("error in accounts");
           reject(err);
         }
         sql.close();
@@ -603,9 +529,6 @@ class Account {
             };
           const recivedAccount = result.recordset[0];
           const accountId = recivedAccount.accountId;
-          console.log(accountId);
-
-          console.log(password);
 
           const hashedPassword = bcrypt.hashSync(password);
 
@@ -634,7 +557,6 @@ class Account {
           Account.validationSchema(newAccount);
 
           resolve(newAccount);
-          console.log("resolved");
         } catch (err) {
           reject(err);
         }
@@ -664,8 +586,6 @@ class Account {
                     SET FK_roleId = @roleId, accountDescription = @accountDescription
                     WHERE accountId = @accountId
                 `);
-
-          console.log("tmpResult");
 
           sql.close();
 

@@ -361,47 +361,8 @@ GO
 
 
 
--- SELECT *
--- FROM stuorgUser u
---     JOIN stuorgAccount a
---     ON u.userId = a.FK_userId
---     INNER JOIN stuorgPassword p
---     ON a.accountId = p.FK_accountId
--- GO
-
--- SELECT *
--- FROM stuorgUser u
---     JOIN stuorgAccount a
---     ON u.userId = a.FK_userId
---     JOIN stuorgRole r
---     ON a.FK_roleId = r.roleId
--- WHERE u.email = 'heJustTryingToWarnYou@email.com'
 
 
--- SELECT *
--- FROM stuorgTask
--- GO
-
-
-
--- SELECT *
--- FROM stuorgGroup
-
-
--- SELECT *
--- FROM stuorgAccount
-
-
--- SELECT *
--- FROM stuorgUser
-
--- SELECT *
--- FROM stuorgUser u
---     JOIN stuorgAccount a
---     ON u.userId = a.FK_userId
---     JOIN stuorgPassword p
---     ON a.accountId= p.FK_accountId
--- WHERE u.userId = 8
 
 
 
