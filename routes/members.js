@@ -11,8 +11,6 @@ const Joi = require("joi");
 router.get("/membership", [authenticate], async (req, res) => {
   try {
     const membershipArray = await Member.getAllMemberships(req.account.userId);
-    console.log("called function");
-    console.log(membershipArray);
     return res.send(JSON.stringify(membershipArray));
   } catch (err) {
     if (err.statusCode) {
@@ -66,7 +64,6 @@ router.post("/:groupId", [authenticate], async (req, res) => {
 
 router.delete("/:groupId/:email", [authenticate], async (req, res) => {
   try {
-    console.log("started removeMember");
     const deletedMember = await Member.removeMember(
       req.account.userId,
       req.params.groupId,

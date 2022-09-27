@@ -54,20 +54,10 @@ class Task {
   static createTask(userId, labelId, taskdueDate, tasksubject) {
     return new Promise((resolve, reject) => {
       (async () => {
-        console.log("started 1 try block on create task");
-        console.log("userId");
-        console.log(userId);
-        console.log("labelId");
-        console.log(labelId);
-        console.log("taskdueDate");
-        console.log(taskdueDate);
-        console.log("tasksubject");
-        console.log(tasksubject);
         // const subject = JSON.stringify(tasksubject)
-        // console.log(subject)
+
         try {
           const pool = await sql.connect(con);
-          console.log("connected to the database");
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)
@@ -82,7 +72,6 @@ class Task {
           FROM stuorgTask
           WHERE taskId = SCOPE_IDENTITY()
           `);
-          console.log("send query");
 
           if (result.recordset.length == 0)
             throw {
@@ -97,15 +86,11 @@ class Task {
               errorMessage: `corrupted data in the database`,
               errorObj: {},
             };
-          console.log("1 result recieved");
 
           const task = result.recordset[0];
-          console.log(task);
 
           resolve(task);
         } catch (err) {
-          console.log("we are at the error");
-          console.log(err);
           reject(err);
         }
         sql.close();
@@ -129,22 +114,14 @@ class Task {
               errorMessage: `no task found in the database`,
               errorObj: {},
             };
-          //   console.log("there is at least 1 task in the database");
-
-          //   console.log(response);
-          //   console.log("tasks in the DB");
 
           let taskArray = [];
 
           response.recordset.forEach((task) => {
-            console.log("this is each task");
             this.validate(task);
-            // console.log("validating task");
             taskArray.push(task);
-            // console.log("pushed into the taskArray");
           });
 
-          console.log(taskArray);
           resolve(taskArray);
         } catch (err) {
           reject(err);
@@ -173,26 +150,16 @@ class Task {
               errorMessage: `no task found in the database`,
               errorObj: {},
             };
-          console.log("there is at least 1 task in the database");
-
-          console.log(response);
-          console.log("tasks in the DB");
 
           let taskArray = [];
-          console.log("created empty array");
 
           response.recordset.forEach((task) => {
-            console.log("this is each task");
             this.validate(task);
-            console.log("validating task");
             taskArray.push(task);
-            console.log("pushed into the taskArray");
           });
 
-          console.log(taskArray);
           resolve(taskArray);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -220,26 +187,16 @@ class Task {
               errorMessage: `no task found in the database`,
               errorObj: {},
             };
-          console.log("there is at least 1 task in the database");
-
-          console.log(response);
-          console.log("tasks in the DB");
 
           let taskArray = [];
-          console.log("created empty array");
 
           response.recordset.forEach((task) => {
-            console.log("this is each task");
             this.validate(task);
-            console.log("validating task");
             taskArray.push(task);
-            console.log("pushed into the taskArray");
           });
 
-          console.log(taskArray);
           resolve(taskArray);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -252,7 +209,6 @@ class Task {
       (async () => {
         try {
           const pool = await sql.connect(con);
-          console.log("opened connection to the DB");
           const result = await pool
             .request()
             .input("userId", sql.Int(), userId)
@@ -272,7 +228,6 @@ class Task {
             AND FK_userId = @userId
             `);
 
-          console.log("send query");
 
           if (result.recordset.length != 1)
             throw {
@@ -281,14 +236,10 @@ class Task {
               errorObj: {},
             };
 
-          console.log("result is 1");
-
           const task = result.recordset[0];
-          console.log(task);
           this.validate(task);
           resolve(task);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
@@ -300,8 +251,6 @@ class Task {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          // console.log("completed");
-          // console.log(completed);
           const pool = await sql.connect(con);
           const result = await pool.request().input("taskId", sql.Int(), taskId)
             .query(`
@@ -314,9 +263,6 @@ class Task {
               WHERE taskId = @taskId
               `);
 
-          console.log("sent query");
-          console.log(result);
-
           if (result.recordset.length != 1)
             throw {
               statusCode: 500,
@@ -324,17 +270,12 @@ class Task {
               errorObj: {},
             };
 
-          console.log("exactly 1");
 
           const task = result.recordset[0];
-          console.log(task);
           this.validate(task);
-          console.log("task updated");
-          console.log(task);
 
           resolve(task);
         } catch (err) {
-          console.log("we are at the error");
           reject(err);
         }
         sql.close();
