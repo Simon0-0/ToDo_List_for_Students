@@ -12,96 +12,111 @@ const Joi = require("joi");
 
 //const admin = require('../middleware/admin'); - NOT CREATED
 
-
-//GET /api/tasks/(?query options) 
+//GET /api/tasks/(?query options)
 router.get("/", [authenticate, adminAuth], async (req, res) => {
-    try {
-      const tasks = await Task.getAllTasks();
-      console.log("called function");
-      return res.send(JSON.stringify(tasks));
-    } catch (err) {
-      if (err.statusCode) {
-        return res.status(err.statusCode).send(JSON.stringify(err));
-      }
-      return res.status(500).send(JSON.stringify(err));
+  try {
+    const tasks = await Task.getAllTasks();
+    console.log("called function");
+    return res.send(JSON.stringify(tasks));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
     }
-  });
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 
-  //GET /api/tasks/own/:labelId - get own tasks with specific labelId
-  router.get("/own/:labelId", [authenticate], async (req, res) => {
-    try {
-      const tasks = await Task.getOwnTasksByLabelId(req.account.userId, req.params.labelId);
-      return res.send(JSON.stringify(tasks));
-    } catch (err) {
-      if (err.statusCode) {
-        return res.status(err.statusCode).send(JSON.stringify(err));
-      }
-      return res.status(500).send(JSON.stringify(err));
+//GET /api/tasks/own/:labelId - get own tasks with specific labelId
+router.get("/own/:labelId", [authenticate], async (req, res) => {
+  try {
+    const tasks = await Task.getOwnTasksByLabelId(
+      req.account.userId,
+      req.params.labelId
+    );
+    return res.send(JSON.stringify(tasks));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
     }
-  });
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 
-  //GET /api/tasks/own - get own tasks
-  router.get("/own", [authenticate], async (req, res) => {
-    try {
-      const tasks = await Task.getOwnTasks(req.account.userId);
-      console.log(req.account.userId);
-      return res.send(JSON.stringify(tasks));
-    } catch (err) {
-      if (err.statusCode) {
-        return res.status(err.statusCode).send(JSON.stringify(err));
-      }
-      return res.status(500).send(JSON.stringify(err));
+//GET /api/tasks/own - get own tasks
+router.get("/own", [authenticate], async (req, res) => {
+  try {
+    const tasks = await Task.getOwnTasks(req.account.userId);
+    console.log(req.account.userId);
+    return res.send(JSON.stringify(tasks));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
     }
-  });
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 
-  
-  //POST /api/tasks/ - create a new task
-  router.post("/", [authenticate], async (req, res) => {
-    try {
-      const payload = Joi.object({
-        labelId: Joi.number().integer(),
-        taskdueDate: Joi.number(),
-        tasksubject: Joi.string() 
-      })
+//POST /api/tasks/ - create a new task
+router.post("/", [authenticate], async (req, res) => {
+  try {
+    const payload = Joi.object({
+      labelId: Joi.number().integer(),
+      taskdueDate: Joi.number(),
+      tasksubject: Joi.string(),
+    });
 
-      let validPayload = payload.validate(req.body);
+    let validPayload = payload.validate(req.body);
 
-      if (validPayload.err)
-        throw {
-          statusCode: 400,
-          errorMessage: "Badly formatted request",
-          errorObj: err,
-        };
-  
-      const task = await Task.createTask(
-        req.account.userId,
-        req.body.labelId,
-        req.body.taskdueDate,
-        req.body.tasksubject
-      );
-  
-      return res.send(JSON.stringify(task));
-    } catch (err) {
-      if (err.statusCode) {
-        return res.status(err.statusCode).send(JSON.stringify(err));
-      }
-      return res.status(500).send(JSON.stringify(err));
+    if (validPayload.err)
+      throw {
+        statusCode: 400,
+        errorMessage: "Badly formatted request",
+        errorObj: err,
+      };
+
+    const task = await Task.createTask(
+      req.account.userId,
+      req.body.labelId,
+      req.body.taskdueDate,
+      req.body.tasksubject
+    );
+
+    return res.send(JSON.stringify(task));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
     }
-  });
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 
-   //DELETE /api/tasks/ - delete a task
-   router.delete("/:taskId", [authenticate], async (req, res) => {
-    try {
-      const task = await Task.deleteTask(req.account.userId, req.params.taskId);
-      console.log('called function')
-      return res.send(JSON.stringify(task));
-    } catch (err) {
-      if (err.statusCode) {
-        return res.status(err.statusCode).send(JSON.stringify(err));
-      }
-      return res.status(500).send(JSON.stringify(err));
+router.put("/completed/:taskId", [authenticate], async (req, res) => {
+  try {
+    console.log("started try and catch");
+    const task = await Task.finishTask(req.params.taskId);
+    console.log(task);
+    console.log("no error so far in put task");
+    return res.send(JSON.stringify(task));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
     }
-  });
-  
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
+
+//DELETE /api/tasks/ - delete a task
+router.delete("/:taskId", [authenticate], async (req, res) => {
+  try {
+    const task = await Task.deleteTask(req.account.userId, req.params.taskId);
+    console.log("called function");
+    return res.send(JSON.stringify(task));
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).send(JSON.stringify(err));
+    }
+    return res.status(500).send(JSON.stringify(err));
+  }
+});
 
 module.exports = router;
